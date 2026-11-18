@@ -34,8 +34,6 @@ function titleOf(table: LibraryTableName, item: LibraryRow): string {
 function showValue(field: FieldSpec, value: unknown, library: LibraryData): string {
   if (value === null || value === undefined || value === '') return 'Не указано'
   if (field.key === 'sourceRef') return library.sources.find(item => item.id === value)?.title as string || 'Источник не найден'
-  const relation = foreignKeys[field.key === 'sourceRef' ? 'sources' : 'ingredients']
-  void relation
   return enumLabels[String(value)] || String(value)
 }
 function FieldEditor({ spec, value, onChange, rows, fixed }: {
@@ -63,7 +61,7 @@ function FieldEditor({ spec, value, onChange, rows, fixed }: {
         <textarea id={inputId} rows={3} maxLength={5000} value={value} onChange={event => onChange(event.target.value)} />
       ) : spec.type === 'select' ? (
         <select id={inputId} value={value} required={spec.required} onChange={event => onChange(event.target.value)}>
-          {!spec.required && <option value="">Не указано</option>}
+          <option value="" disabled={Boolean(spec.required)}>{spec.required ? 'Выберите…' : 'Не указано'}</option>
           {spec.options ? spec.options.map(option =>
             <option key={option} value={option}>{enumLabels[option] ?? option}</option>) :
             (linked ? rows[linked] : []).map(entry =>
