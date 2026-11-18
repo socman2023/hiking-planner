@@ -1,4 +1,6 @@
 import { db, type HikingDB } from './db'
+import { libraryTables, type LibraryRow } from '../domain/library'
+import { readLibrary, validateLibraryData } from './libraryRepository'
 import {
   activityLabels, addDays, dayKindLabels, statusLabels, validISODate,
   type AppSetting, type Trip, type TripDay,
@@ -15,9 +17,16 @@ export interface BackupV1 {
   }
 }
 
-const MAX_FILE_BYTES = 10 * 1024 * 1024
+export interface BackupV2 {
+  format: 'hiking-planner-backup'
+  schemaVersion: 2
+  exportedAt: string
+  data: BackupV1['data'] & { library: Record<(typeof libraryTables)[number], LibraryRow[]> }
+}
+export type AnyBackup = BackupV1 | BackupV2
+const MAX_FILE_BYTES = 20 * 1024 * 1024
 
-export async function makeBackup(database: HikingDB = db): Promise<BackupV1> {
+export async function makeBackup(database: HikingDB = db): Promise<BackupV2> {
   const [trips, days, settings] = await database.transaction(
     'r', database.trips, database.days, database.settings,
     async () => Promise.all([
@@ -26,9 +35,9 @@ export async function makeBackup(database: HikingDB = db): Promise<BackupV1> {
   )
   return {
     format: 'hiking-planner-backup',
-    schemaVersion: 1,
+    schemaVersion: 2,
     exportedAt: new Date().toISOString(),
-    data: { trips, days, settings },
+    data: { trips, days, settings, library: await readLibrary(database) },
   }
 }
 
@@ -66,13 +75,13 @@ function validSetting(value: unknown): value is AppSetting {
 }
 function unique(ids: string[]): boolean { return new Set(ids).size === ids.length }
 
-export function parseBackup(text: string): BackupV1 {
+export function parseBackup(text: string): AnyBackup {
   if (new TextEncoder().encode(text).length > MAX_FILE_BYTES) {
-    throw new Error('Резервная копия слишком велика (максимум 10 МБ для этапа 1)')
+    throw new Error('Резервная копия слишком велика (максимум 20 МБ)')
   }
   let raw: unknown
   try { raw = JSON.parse(text) } catch { throw new Error('Файл не является корректным JSON') }
-  if (!record(raw) || raw.format !== 'hiking-planner-backup' || raw.schemaVersion !== 1 ||
+  if (!record(raw) || raw.format !== 'hiking-planner-backup' || (raw.schemaVersion !== 1 && raw.schemaVersion !== 2) ||
       !dateTime(raw.exportedAt) || !record(raw.data)) {
     throw new Error('Неизвестный формат или версия резервной копии')
   }
@@ -101,20 +110,28 @@ export function parseBackup(text: string): BackupV1 {
       throw new Error('Нарушена последовательность календарных дней похода «' + trip.title + '»')
     }
   }
-  return raw as unknown as BackupV1
+  if (raw.schemaVersion === 2) validateLibraryData(raw.data.library)
+  return raw as unknown as AnyBackup
 }
 
-export async function restoreBackup(backup: BackupV1, database: HikingDB = db): Promise<void> {
+export async function restoreBackup(backup: AnyBackup, database: HikingDB = db): Promise<void> {
   const checked = parseBackup(JSON.stringify(backup))
-  await database.transaction('rw', database.trips, database.days, database.settings, async () => {
+  await database.transaction('rw', database.trips, database.days, database.settings,
+    ...libraryTables.map(table => database[table]), async () => {
     await Promise.all([database.trips.clear(), database.days.clear(), database.settings.clear()])
+    if (checked.schemaVersion === 2) {
+      for (const table of libraryTables) await database[table].clear()
+      for (const table of libraryTables) {
+        if (checked.data.library[table].length) await database[table].bulkAdd(checked.data.library[table])
+      }
+    }
     if (checked.data.trips.length) await database.trips.bulkAdd(checked.data.trips)
     if (checked.data.days.length) await database.days.bulkAdd(checked.data.days)
     if (checked.data.settings.length) await database.settings.bulkAdd(checked.data.settings)
   })
 }
 
-export function saveBackupToFile(backup: BackupV1): void {
+export function saveBackupToFile(backup: AnyBackup): void {
   const name = 'hiking-planner-backup-' + new Date().toISOString().slice(0, 10) + '.json'
   const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)

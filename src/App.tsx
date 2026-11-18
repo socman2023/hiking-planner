@@ -14,7 +14,7 @@ import {
   createTrip, deleteTrip, duplicateTrip, editDay, getTripDays, previewRemovedDays,
   setTripStatus, updateTrip,
 } from './data/tripRepository'
-import { makeBackup, parseBackup, restoreBackup, saveBackupToFile, type BackupV1 } from './data/backup'
+import { makeBackup, parseBackup, restoreBackup, saveBackupToFile, type AnyBackup } from './data/backup'
 import {
   activityLabels, dayKindLabels, formatDate, formatRange, hasDayDetails, statusLabels,
   type ActivityType, type DayKind, type Trip, type TripDay, type TripInput, type TripStatus,
@@ -480,7 +480,7 @@ function FuturePage({ kind: override }: { kind?: string }) {
 function SettingsPage({ notify }: { notify: Notify }) {
   const trips = useLiveQuery(() => db.trips.count(), [])
   const days = useLiveQuery(() => db.days.count(), [])
-  const [pending, setPending] = useState<BackupV1 | null>(null)
+  const [pending, setPending] = useState<AnyBackup | null>(null)
   const [busy, setBusy] = useState(false)
   const fileInput = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
@@ -494,7 +494,7 @@ function SettingsPage({ notify }: { notify: Notify }) {
     setPending(null)
     if (!file) return
     try {
-      if (file.size > 10 * 1024 * 1024) throw new Error('Файл больше 10 МБ')
+      if (file.size > 20 * 1024 * 1024) throw new Error('Файл больше 20 МБ')
       const parsed = parseBackup(await file.text())
       setPending(parsed)
       notify('Резервная копия проверена; выберите восстановление')
@@ -502,7 +502,7 @@ function SettingsPage({ notify }: { notify: Notify }) {
     finally { e.target.value = '' }
   }
   async function restore() {
-    if (!pending || !window.confirm('ВНИМАНИЕ: восстановление полностью заменит ВСЕ нынешние походы и дни на этом устройстве (' + (trips ?? 0) + ' походов). Сначала скачайте текущую резервную копию. Продолжить?')) return
+    if (!pending || !window.confirm('ВНИМАНИЕ: восстановление заменит походы и дни' + (pending.schemaVersion === 2 ? ' и библиотеку' : '; библиотека останется без изменений') + ' на этом устройстве (' + (trips ?? 0) + ' походов). Сначала скачайте текущую резервную копию. Продолжить?')) return
     try { setBusy(true); await restoreBackup(pending); setPending(null); notify('Данные полностью восстановлены'); navigate('/') }
     catch(e) { notify(e instanceof Error ? e.message : 'Не удалось восстановить данные', true) }
     finally { setBusy(false) }
@@ -513,25 +513,25 @@ function SettingsPage({ notify }: { notify: Notify }) {
       <div className="settings-grid">
         <section className="panel">
           <div className="panel-title"><h2>Локальная база</h2><HardDrive size={20}/></div>
-          <p className="panel-subtitle">IndexedDB · Hiking Planner v1</p>
+          <p className="panel-subtitle">IndexedDB · Hiking Planner v2</p>
           <div className="settings-totals"><div><strong>{trips ?? '—'}</strong><span>походов</span></div><div><strong>{days ?? '—'}</strong><span>календарных дней</span></div></div>
           <div className="form-help"><ShieldCheck size={17}/> Данные не отправляются на сервер. Очистка хранилища браузера или использование другого устройства могут привести к их отсутствию.</div>
         </section>
         <section className="panel">
           <div className="panel-title"><h2>Скачать резервную копию</h2><Download size={20}/></div>
-          <p className="panel-subtitle">Сохраните все походы и их календарные дни в одном JSON-файле. Повторяйте это после важных изменений.</p>
+          <p className="panel-subtitle">Сохраните походы, дни и всю личную библиотеку в одном JSON-файле. Повторяйте это после важных изменений.</p>
           <button className="button primary" onClick={() => void download()} disabled={busy}><Download size={18}/> Скачать JSON</button>
         </section>
         <section className="panel">
           <div className="panel-title"><h2>Восстановить данные</h2><Upload size={20}/></div>
-          <p className="panel-subtitle">Выберите резервную копию формата Hiking Planner версии 1. Сначала мы проверим структуру файла, затем предложим подтвердить полную замену данных.</p>
+          <p className="panel-subtitle">Выберите резервную копию формата Hiking Planner версии 1 или 2. Сначала мы проверим структуру файла, затем предложим подтвердить полную замену данных.</p>
           <input ref={fileInput} type="file" accept=".json,application/json" className="visually-hidden" onChange={e => void selectFile(e)}/>
           <button className="button secondary" onClick={() => fileInput.current?.click()} disabled={busy}><Upload size={18}/> Выбрать JSON-файл</button>
-          {pending && <div className="restore-preview"><strong><CheckCircle2 size={17}/> Файл прошёл проверку</strong><span>Походов: {pending.data.trips.length} · дней: {pending.data.days.length}</span><span>Создан: {new Date(pending.exportedAt).toLocaleString('ru-RU')}</span><button className="button danger" onClick={() => void restore()} disabled={busy}>Заменить данные содержимым файла</button></div>}
+          {pending && <div className="restore-preview"><strong><CheckCircle2 size={17}/> Файл прошёл проверку</strong><span>Походов: {pending.data.trips.length} · дней: {pending.data.days.length}{pending.schemaVersion === 2 ? ' · записей библиотеки: ' + Object.values(pending.data.library).reduce((total, rows) => total + rows.length, 0) : ' · старый архив без библиотеки'}</span><span>Создан: {new Date(pending.exportedAt).toLocaleString('ru-RU')}</span><button className="button danger" onClick={() => void restore()} disabled={busy}>Заменить данные содержимым файла</button></div>}
         </section>
         <section className="panel">
           <div className="panel-title"><h2>Как устроено хранение</h2><Info size={20}/></div>
-          <div className="storage-notes"><p><strong>Работает без интернета</strong><br/>После первой загрузки открытая вкладка может редактировать уже сохранённые походы без сети.</p><p><strong>Публикация пока не настроена</strong><br/>Установка PWA и автономный запуск после закрытия браузера появятся на более позднем этапе.</p><p><strong>Не синхронизируется автоматически</strong><br/>Перенос данных на другое устройство сейчас возможен через JSON-файл.</p></div>
+          <div className="storage-notes"><p><strong>Работает без интернета</strong><br/>После первой загрузки открытая вкладка может редактировать уже сохранённые походы без сети.</p><p><strong>GitHub Pages подключён</strong><br/>Приложение открывается по ссылке; полноценный автономный запуск после закрытия браузера появится с PWA на более позднем этапе.</p><p><strong>Не синхронизируется автоматически</strong><br/>Перенос данных на другое устройство сейчас возможен через JSON-файл.</p></div>
         </section>
       </div>
     </>
