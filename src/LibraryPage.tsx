@@ -250,7 +250,7 @@ export default function LibraryPage() {
 
       <section className="library-seed-banner" aria-label="Исходные данные из Excel">
         <div><strong>Каталоги из «Крым — 4 дня» и «Архыз — 4 дня»</strong>
-          <p>43 продукта, 43 фасовки, 113 позиций снаряжения, 27 медицинских карточек, 54 исторические записи аптечки и 9 источников. Данные добавляются без замены имеющихся записей.</p>
+          <p>43 продукта, 43 фасовки, 113 строк снаряжения (111 уникальных после объединения повторов), 27 медицинских карточек, 54 исторические записи аптечки и 9 источников. Данные добавляются без замены имеющихся записей.</p>
           <small role="status">{seedBusy ? 'Проверяем встроенный каталог…' : seedStatus || 'Подготовка каталога…'}</small></div>
         <button type="button" className="button secondary" onClick={() => void repeatSeedImport()} disabled={seedBusy}>
           <ArchiveRestore size={17}/> Сверить и добавить недостающее
