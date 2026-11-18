@@ -39,7 +39,7 @@ export async function correctJetboilBrand(database: HikingDB = db): Promise<numb
       if (String(row.brand ?? '').trim()) continue
       const name = String(row.name ?? '')
       const model = String(row.model ?? '')
-      if (!/(^|[\\s,(])jetboil\\b/i.test(model) && !/^jetboil\\b/i.test(name)) continue
+      if (!/(^|[\s,(])jetboil\b/i.test(model) && !/^jetboil\b/i.test(name)) continue
       await database.gear.update(row.id, {brand:'Jetboil',updatedAt:new Date().toISOString()})
       changed++
     }
