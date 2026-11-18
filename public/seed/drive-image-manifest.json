@@ -281,6 +281,36 @@
       "path": "seed/photos/lp-a9cua5-483.jpg",
       "filename": "RaidLight Ultra Legend 20.jpg",
       "match": "exact-model"
+    },
+    "a9cua5:678": {
+      "path": "seed/photos/lp-a9cua5-678.jpg",
+      "filename": "Osprey Duro 15.jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:1750": {
+      "path": "seed/photos/lp-a9cua5-678.jpg",
+      "filename": "Osprey Duro 15.jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:456": {
+      "path": "seed/photos/lp-a9cua5-456.jpg",
+      "filename": "RaidLight Trail Xp 14.jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:356": {
+      "path": "seed/photos/lp-a9cua5-356.jpg",
+      "filename": "Camp Trail Vest Light.jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:1253": {
+      "path": "seed/photos/lp-a9cua5-1253.jpg",
+      "filename": "Active Leisure Fox 8.jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:48": {
+      "path": "seed/photos/lp-a9cua5-48.jpg",
+      "filename": "Quechua Iliader 30.jpg",
+      "match": "exact-model"
     }
   }
 }
