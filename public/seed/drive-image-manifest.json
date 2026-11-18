@@ -231,6 +231,31 @@
       "path": "seed/photos/gear-61.jpg",
       "filename": "AKG.jpg",
       "match": "exact-model"
+    },
+    "a9cua5:36": {
+      "path": "seed/photos/lp-a9cua5-36.jpg",
+      "filename": "RedFox Lhotse 100.jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:38": {
+      "path": "seed/photos/lp-a9cua5-38.jpg",
+      "filename": "Nordway Trekker 75.jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:39": {
+      "path": "seed/photos/lp-a9cua5-39.jpg",
+      "filename": "Huadang B-14.jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:1366": {
+      "path": "seed/photos/lp-a9cua5-1366.jpg",
+      "filename": "Northland Camino 60.jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:42": {
+      "path": "seed/photos/lp-a9cua5-42.jpg",
+      "filename": "Outventure Trekker 55.jpg",
+      "match": "exact-model"
     }
   }
 }
