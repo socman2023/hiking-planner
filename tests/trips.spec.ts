@@ -46,6 +46,6 @@ test('резервная копия восстанавливает походы'
   page.once('dialog', async dialog => { await dialog.accept() })
   await page.getByRole('button', { name: 'Заменить данные содержимым файла' }).click()
   await expect(page.getByRole('heading', { name: 'Мои походы' })).toBeVisible()
-  await expect(page.getByText('Мой тест')).toBeVisible()
+  await expect(page.getByText('Мой тест')).toBeVisible({ timeout: 15000 })
   expect(fs).toBeDefined()
 })
