@@ -79,11 +79,11 @@ describe('этап 2: библиотека и независимость от п
     expect((await database.foods.get(food.id))?.name).toBe('Орехи')
     expect((await database.trips.get(trip.id))?.title).toBe('Соло')
   })
-  it('сохраняет в полном бэкапе v2 библиотеку и умеет читать v1', async () => {
+  it('сохраняет в полном бэкапе v3 библиотеку и умеет читать v1', async () => {
     const trip = await createTrip(sample, database)
     const food = await saveLibraryRow('foods', { name: 'Смесь', proteinPer100g: '0' }, undefined, database)
     const copy = await makeBackup(database)
-    expect(copy.schemaVersion).toBe(2)
+    expect(copy.schemaVersion).toBe(3)
     expect(copy.data.library.foods).toHaveLength(1)
     await deleteLibraryRow('foods', food.id, database)
     await restoreBackup(parseBackup(JSON.stringify(copy)), database)
