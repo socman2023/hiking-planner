@@ -1,7 +1,7 @@
 import { db, type HikingDB } from './db'
 import {
   definitions, foreignKeys, libraryTables, validateRow, normalizeRow,
-  type LibraryTableName, type LibraryRow,
+  type LibraryTableName, type LibraryRow, validatePhotoData, type LibraryPhoto,
 } from '../domain/library'
 
 export type LibraryData = Record<LibraryTableName, LibraryRow[]>
@@ -11,7 +11,7 @@ export interface LibraryArchive {
   exportedAt: string
   data: LibraryData
 }
-export const LIBRARY_MAX_BYTES = 10 * 1024 * 1024
+export const LIBRARY_MAX_BYTES = 45 * 1024 * 1024
 
 export async function readLibrary(database: HikingDB = db): Promise<LibraryData> {
   const arrays = await Promise.all(libraryTables.map(name => database[name].toArray()))
@@ -57,7 +57,7 @@ export function validateLibraryData(value: unknown): LibraryData {
   return result
 }
 export function parseLibraryArchive(text: string): LibraryArchive {
-  if (new TextEncoder().encode(text).length > LIBRARY_MAX_BYTES) throw new Error('Файл больше 10 МБ')
+  if (new TextEncoder().encode(text).length > LIBRARY_MAX_BYTES) throw new Error('Файл больше 45 МБ')
   let raw: unknown
   try { raw = JSON.parse(text) } catch { throw new Error('Некорректный JSON') }
   if (!isObject(raw) || raw.format !== 'hiking-planner-library' || raw.schemaVersion !== 1 ||
@@ -108,6 +108,15 @@ export async function deleteLibraryRow(table: LibraryTableName, id: string, data
     await database[table].delete(id)
   })
 }
+
+export async function saveLibraryPhotos(table: LibraryTableName, id: string, photos: LibraryPhoto[],
+  database: HikingDB = db): Promise<void> {
+  const encoded = JSON.stringify(photos)
+  validatePhotoData(encoded)
+  if (!(await database[table].get(id))) throw new Error('Карточка не найдена')
+  await database[table].update(id, { photoData: encoded, updatedAt: new Date().toISOString() })
+}
+
 export function saveJsonFile(name: string, content: string, mime = 'application/json'): void {
   const url = URL.createObjectURL(new Blob([content], { type: mime + ';charset=utf-8' }))
   const a = document.createElement('a')

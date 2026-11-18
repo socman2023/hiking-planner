@@ -495,7 +495,7 @@ function SettingsPage({ notify }: { notify: Notify }) {
     setPending(null)
     if (!file) return
     try {
-      if (file.size > 20 * 1024 * 1024) throw new Error('Файл больше 20 МБ')
+      if (file.size > 60 * 1024 * 1024) throw new Error('Файл больше 60 МБ')
       const parsed = parseBackup(await file.text())
       setPending(parsed)
       notify('Резервная копия проверена; выберите восстановление')

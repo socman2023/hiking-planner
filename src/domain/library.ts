@@ -59,7 +59,8 @@ export const definitions: Record<LibraryTableName, LibraryDefinition> = {
   gear: {
     label: 'Снаряжение', singular: 'позицию', title: 'name',
     fields: [field('name', 'Название', 'text', true), field('brand', 'Бренд'), field('model', 'Модель'),
-      category, grams('manufacturerWeightG', 'Масса по каталогу, г'), sourceRef, notes],
+      category, grams('manufacturerWeightG', 'Масса производителя, г'),
+      grams('listedWeightG', 'Вес из походного списка, г'), sourceRef, notes],
   },
   ownedGear: {
     label: 'Свои вещи', singular: 'экземпляр', title: 'nickname',
@@ -116,7 +117,8 @@ export function validateRow(table: LibraryTableName, input: LibraryRow): void {
   if (!input.id || !input.createdAt || !input.updatedAt || !Number.isFinite(Date.parse(input.createdAt)) ||
     !Number.isFinite(Date.parse(input.updatedAt))) throw new Error('Некорректные служебные поля записи')
   const fields = definitions[table].fields
-  if (Object.keys(input).some(key => !['id', 'createdAt', 'updatedAt'].includes(key) && !fields.some(f => f.key === key))) {
+  if (input.photoData !== undefined && input.photoData !== null) validatePhotoData(input.photoData)
+  if (Object.keys(input).some(key => !['id', 'createdAt', 'updatedAt', 'photoData'].includes(key) && !fields.some(f => f.key === key))) {
     throw new Error('Неизвестное поле каталога')
   }
   for (const spec of fields) {
@@ -142,6 +144,27 @@ export function validateRow(table: LibraryTableName, input: LibraryRow): void {
     }
   }
 }
+export const MAX_PHOTOS = 4
+export const MAX_PHOTO_DATA_CHARS = 1_300_000
+export interface LibraryPhoto { src: string; name: string }
+export function validatePhotoData(value: unknown): LibraryPhoto[] {
+  if (typeof value !== 'string' || value.length > MAX_PHOTO_DATA_CHARS) throw new Error('Слишком большой набор фотографий')
+  let decoded: unknown
+  try { decoded = JSON.parse(value) } catch { throw new Error('Повреждены данные фотографий') }
+  if (!Array.isArray(decoded) || decoded.length > MAX_PHOTOS) throw new Error('Можно сохранить не более четырёх фотографий')
+  if (!decoded.every((v: unknown) => typeof v === 'object' && v !== null &&
+    typeof (v as LibraryPhoto).name === 'string' && (v as LibraryPhoto).name.length <= 140 &&
+    typeof (v as LibraryPhoto).src === 'string' && (v as LibraryPhoto).src.length <= 300_000 &&
+    /^data:image\/(?:png|jpeg|webp);base64,[a-zA-Z0-9+/=]+$/.test((v as LibraryPhoto).src))) {
+    throw new Error('Недопустимый формат изображения')
+  }
+  return decoded as LibraryPhoto[]
+}
+export function getLibraryPhotos(row: LibraryRow | null | undefined): LibraryPhoto[] {
+  if (!row || typeof row.photoData !== 'string') return []
+  try { return validatePhotoData(row.photoData) } catch { return [] }
+}
+
 function safeHttpUrl(value: string): boolean {
   try { return ['http:', 'https:'].includes(new URL(value).protocol) } catch { return false }
 }
@@ -153,6 +176,7 @@ export function normalizeRow(table: LibraryTableName, values: Record<string, unk
     if (spec.type === 'number') row[spec.key] = v === null || v === undefined || String(v).trim() === '' ? null : Number(v)
     else row[spec.key] = String(v ?? '').trim() || (spec.key === 'form' ? 'unknown' : '')
   }
+  if (existing?.photoData) row.photoData = existing.photoData
   validateRow(table, row)
   return row
 }

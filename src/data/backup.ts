@@ -24,7 +24,7 @@ export interface BackupV2 {
   data: BackupV1['data'] & { library: Record<(typeof libraryTables)[number], LibraryRow[]> }
 }
 export type AnyBackup = BackupV1 | BackupV2
-const MAX_FILE_BYTES = 20 * 1024 * 1024
+const MAX_FILE_BYTES = 60 * 1024 * 1024
 
 export async function makeBackup(database: HikingDB = db): Promise<BackupV2> {
   const [trips, days, settings] = await database.transaction(
@@ -77,7 +77,7 @@ function unique(ids: string[]): boolean { return new Set(ids).size === ids.lengt
 
 export function parseBackup(text: string): AnyBackup {
   if (new TextEncoder().encode(text).length > MAX_FILE_BYTES) {
-    throw new Error('Резервная копия слишком велика (максимум 20 МБ)')
+    throw new Error('Резервная копия слишком велика (максимум 60 МБ)')
   }
   let raw: unknown
   try { raw = JSON.parse(text) } catch { throw new Error('Файл не является корректным JSON') }
