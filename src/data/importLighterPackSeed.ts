@@ -30,9 +30,6 @@ function validPhoto(value: string): boolean {
   return /^https:\/\/i\.imgur\.com\/[A-Za-z0-9._-]+\.(?:jpg|jpeg|png|webp)$/i.test(value)
 }
 export async function importLighterPackCatalog(force = false, database: HikingDB = db): Promise<LighterPackImportResult> {
-  if (!force && (await database.settings.get(SETTING))?.value === VERSION) {
-    return { added:0, existing:0, images:0 }
-  }
   const response = await fetch(import.meta.env.BASE_URL + 'seed/lighterpack.json')
   if (!response.ok) throw new Error('Не удалось загрузить каталог LighterPack')
   const data: LPSeed = await response.json()
@@ -45,6 +42,11 @@ export async function importLighterPackCatalog(force = false, database: HikingDB
   const imageData: { version:number; images: Record<string,{path:string;match:string}> } =
     await imageResponse.json()
   if (imageData.version!==1 || typeof imageData.images!=='object') throw new Error('Некорректная карта Drive')
+  // A newly published photo manifest must apply even when the gear catalogue was imported earlier.
+  const importedRevision = VERSION + ':photos-' + Object.keys(imageData.images).length
+  if (!force && (await database.settings.get(SETTING))?.value === importedRevision) {
+    return {added:0,existing:0,images:0}
+  }
   for (const list of data.lists) {
     if (!['a9cua5','4pg9c9','gdl4a','0lr1s5'].includes(list.code) ||
         !Array.isArray(list.items) || list.items.length < 10) {
@@ -52,7 +54,7 @@ export async function importLighterPackCatalog(force = false, database: HikingDB
     }
   }
   return database.transaction('rw', [database.gear, database.sources, database.settings], async () => {
-    if (!force && (await database.settings.get(SETTING))?.value === VERSION) {
+    if (!force && (await database.settings.get(SETTING))?.value === importedRevision) {
       return {added:0,existing:0,images:0}
     }
     const gear = await database.gear.toArray()
@@ -122,7 +124,7 @@ export async function importLighterPackCatalog(force = false, database: HikingDB
         if (photo) images++
       }
     }
-    await database.settings.put({key:SETTING,value:VERSION})
+    await database.settings.put({key:SETTING,value:importedRevision})
     return {added,existing,images}
   })
 }
