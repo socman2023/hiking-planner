@@ -1,130 +1,158 @@
 import { db, type HikingDB } from './db'
 import type { LibraryRow } from '../domain/library'
-import { detectGearBrand } from '../domain/gearBrand'
+import { parseGearDescription } from '../domain/gearDescription'
 
-const VERSION = 'lighterpack-2026-11-18-v5-drive'
 const SETTING = 'lighterpackSeedVersion'
+const VERSION = 'lighterpack-v6-normalized-models-owned-v1'
 interface LPItem {
-  itemId: string
-  name: string
-  description: string
-  category: string
-  weightG: number | null
-  photoUrl: string
-  productUrl: string
+  itemId: string; name: string; description: string; category: string
+  weightG: number | null; quantity?: number; photoUrl: string; productUrl: string
 }
 interface LPList { code: string; url: string; items: LPItem[] }
 interface LPSeed { format: string; version: number; lists: LPList[] }
 export interface LighterPackImportResult { added: number; existing: number; images: number }
 
-function norm(value: unknown): string {
-  return String(value ?? '').trim().replace(/\s+/g, ' ').toLocaleLowerCase('ru')
+const norm = (value: unknown) => String(value ?? '').trim().replace(/\s+/g, ' ').toLocaleLowerCase('ru')
+const key = (name: unknown, model: unknown) => norm(name) + '|' + norm(model)
+const validProductUrl = (url: string) => {
+  try { return ['https:', 'http:'].includes(new URL(url).protocol) } catch { return false }
 }
-function key(name: unknown, model: unknown): string {
-  return norm(name) + '|' + norm(model)
-}
-function validProductLink(value: string): boolean {
-  try { return ['http:','https:'].includes(new URL(value).protocol) } catch { return false }
-}
-function validPhoto(value: string): boolean {
-  return /^https:\/\/i\.imgur\.com\/[A-Za-z0-9._-]+\.(?:jpg|jpeg|png|webp)$/i.test(value)
-}
+const validPhoto = (url: string) => /^https:\/\/i\.imgur\.com\/[A-Za-z0-9._-]+\.(?:jpg|jpeg|png|webp)$/i.test(url)
+const idFor = (list: string, item: string) => list + ':' + item
+const keysFor = (row: LibraryRow): string[] =>
+  String(row.sourceEntryKeys ?? '').split('|').filter(Boolean)
+
 export async function importLighterPackCatalog(force = false, database: HikingDB = db): Promise<LighterPackImportResult> {
   const response = await fetch(import.meta.env.BASE_URL + 'seed/lighterpack.json')
   if (!response.ok) throw new Error('Не удалось загрузить каталог LighterPack')
   const data: LPSeed = await response.json()
   if (data.format !== 'hiking-planner-lighterpack' || data.version !== 1 ||
-      !Array.isArray(data.lists) || data.lists.length !== 4) {
-    throw new Error('Некорректная версия каталога LighterPack')
-  }
+      !Array.isArray(data.lists) || data.lists.length !== 4) throw new Error('Неизвестная версия LighterPack')
   const imageResponse = await fetch(import.meta.env.BASE_URL + 'seed/drive-image-manifest.json')
-  if (!imageResponse.ok) throw new Error('Не удалось загрузить карту фотографий Drive')
-  const imageData: { version:number; images: Record<string,{path:string;match:string}> } =
-    await imageResponse.json()
-  if (imageData.version!==1 || typeof imageData.images!=='object') throw new Error('Некорректная карта Drive')
-  // A newly published photo manifest must apply even when the gear catalogue was imported earlier.
-  const importedRevision = VERSION + ':photos-' + Object.keys(imageData.images).length
-  if (!force && (await database.settings.get(SETTING))?.value === importedRevision) {
+  if (!imageResponse.ok) throw new Error('Не удалось загрузить фотографии снаряжения')
+  const manifest: {version:number; images:Record<string,{path:string;match:string}>} = await imageResponse.json()
+  if (manifest.version !== 1 || typeof manifest.images !== 'object') throw new Error('Некорректная карта фотографий')
+  const revision = VERSION + ':photos-' + Object.keys(manifest.images).length
+  if (!force && (await database.settings.get(SETTING))?.value === revision)
     return {added:0,existing:0,images:0}
-  }
-  for (const list of data.lists) {
-    if (!['a9cua5','4pg9c9','gdl4a','0lr1s5'].includes(list.code) ||
-        !Array.isArray(list.items) || list.items.length < 10) {
+  for (const list of data.lists)
+    if (!['a9cua5','4pg9c9','gdl4a','0lr1s5'].includes(list.code) || !Array.isArray(list.items) || list.items.length < 10)
       throw new Error('Неполный список LighterPack')
-    }
-  }
-  return database.transaction('rw', [database.gear, database.sources, database.settings], async () => {
-    if (!force && (await database.settings.get(SETTING))?.value === importedRevision) {
+
+  return database.transaction('rw', [database.gear,database.ownedGear,database.sources,database.settings], async () => {
+    if (!force && (await database.settings.get(SETTING))?.value === revision)
       return {added:0,existing:0,images:0}
-    }
     const gear = await database.gear.toArray()
-    const byKey = new Map<string, LibraryRow>(gear.map(item => [key(item.name, item.model), item]))
+    const bySource = new Map<string, LibraryRow>()
+    const byRaw = new Map<string, LibraryRow>()
     const byModel = new Map<string, LibraryRow[]>()
     for (const row of gear) {
+      for (const sourceKey of keysFor(row)) bySource.set(sourceKey,row)
+      byRaw.set(key(row.name,row.sourceDescription || row.model), row)
       const model = norm(row.model)
-      if (model.length < 14) continue
-      byModel.set(model, [...(byModel.get(model) ?? []), row])
+      if (model.length < 4) continue
+      byModel.set(key(row.name,model),[...(byModel.get(key(row.name,model)) ?? []),row])
     }
     const sources = await database.sources.toArray()
     const sourceIds = new Map<string,string>()
     for (const list of data.lists) {
-      const current = sources.find(item => item.url === list.url)
-      if (current) { sourceIds.set(list.code,current.id); continue }
+      const found = sources.find(row => row.url === list.url)
+      if (found) {sourceIds.set(list.code,found.id);continue}
       const now = new Date().toISOString()
-      const source = {id:crypto.randomUUID(),createdAt:now,updatedAt:now,
+      const source:LibraryRow = {id:crypto.randomUUID(),createdAt:now,updatedAt:now,
         title:'LighterPack '+list.code,provider:'LighterPack',url:list.url,
         licence:'',retrievedAt:now.slice(0,10),reliability:'source_recorded',reviewedAt:'',notes:''}
       await database.sources.add(source)
       sourceIds.set(list.code,source.id)
     }
-    let added=0, existing=0, images=0
-    for (const list of data.lists) {
-      for (const item of list.items) {
-        if (!item.name || item.name.length > 500 || item.description.length > 500 ||
-            (item.weightG !== null && (!Number.isFinite(item.weightG) || item.weightG < 0))) continue
-        const title=item.name.trim()
-        const description=item.description.trim()
-        const ref=key(title,description)
-        const photo=validPhoto(item.photoUrl || '') ? item.photoUrl : ''
-        const productUrl=validProductLink(item.productUrl || '') ? item.productUrl : ''
-        const candidates = byModel.get(norm(description)) ?? []
-        // Only merge a differently named source item when its detailed model matches uniquely.
-        const current=byKey.get(ref) ?? (description.length >= 14 && candidates.length === 1 ? candidates[0] : undefined)
-        const brand = detectGearBrand(description,title)
-        const fromDrive = imageData.images[list.code + ':' + item.itemId]
-        const drivePath = typeof fromDrive?.path === 'string' && /^seed\/photos\/(?:gear-\d+|lp-[a-z0-9]+-\d+)\.jpg$/.test(fromDrive.path) ? fromDrive.path : ''
-        if (current) {
-          existing++
-          const changes: Record<string,string|number>={}
-          if (photo && !current.photoUrl) { changes.photoUrl=photo; images++ }
-          if (brand && !current.brand) changes.brand=brand
-          if (drivePath && !current.photoPath) {changes.photoPath=drivePath;changes.photoMatch='exact'}
-          if (productUrl && !current.productUrl) changes.productUrl=productUrl
-          if (typeof item.weightG==='number' && current.listedWeightG == null) {
-            changes.listedWeightG=item.weightG
-          }
-          if (Object.keys(changes).length) {
-            changes.updatedAt=new Date().toISOString()
-            await database.gear.update(current.id,changes)
-            Object.assign(current,changes)
-          }
-          continue
+    const owned = await database.ownedGear.toArray()
+    const byOwned = new Map<string,LibraryRow[]>()
+    for(const row of owned) {
+      const gearId=String(row.catalogItemId)
+      byOwned.set(gearId,[...(byOwned.get(gearId) ?? []),row])
+    }
+    let added = 0, existing = 0, images = 0
+    for (const list of data.lists) for (const item of list.items) {
+      if (!item.name || !item.description || item.name.length > 500 || item.description.length > 500 ||
+          (item.weightG !== null && (!Number.isFinite(item.weightG) || item.weightG < 0))) continue
+      const parsed = parseGearDescription(item.description,item.name)
+      const identifier = idFor(list.code,item.itemId)
+      const rawKey = key(item.name,item.description)
+      const normalizedKey = key(item.name,parsed.model)
+      const candidates = byModel.get(normalizedKey) ?? []
+      const current = bySource.get(identifier) || byRaw.get(rawKey) ||
+        (candidates.length === 1 && norm(candidates[0].sourceDescription || candidates[0].model) === norm(item.description)
+          ? candidates[0] : undefined)
+      const photo=validPhoto(item.photoUrl || '') ? item.photoUrl : ''
+      const productUrl=validProductUrl(item.productUrl || '') ? item.productUrl : ''
+      const fromDrive=manifest.images[identifier]
+      const drivePath = fromDrive?.match === 'exact-model' && typeof fromDrive.path === 'string' &&
+        /^seed\/photos\/(?:gear-\d+|lp-[a-z0-9]+-\d+)\.jpg$/.test(fromDrive.path) ? fromDrive.path : ''
+      let linked:LibraryRow
+      if (current) {
+        linked=current;existing++
+        const changes: Record<string,string|number|null>={}
+        if (!current.brand && parsed.brand) changes.brand=parsed.brand
+        if (norm(current.model) === norm(item.description) && parsed.model) changes.model=parsed.model
+        if (!current.sourceDescription) changes.sourceDescription=item.description
+        for (const field of ['lengthCm','widthCm','thicknessCm','rValue'] as const)
+          if (current[field] == null && parsed[field] !== null) changes[field]=parsed[field]
+        if (!current.temperatureHint && parsed.temperatureHint) changes.temperatureHint=parsed.temperatureHint
+        if (!current.specifications && parsed.specifications) changes.specifications=parsed.specifications
+        if (photo && !current.photoUrl) { changes.photoUrl=photo; images++ }
+        if (drivePath && !current.photoPath) {changes.photoPath=drivePath; changes.photoMatch='exact'}
+        if (productUrl && !current.productUrl) changes.productUrl=productUrl
+        if (typeof item.weightG==='number' && current.listedWeightG == null) changes.listedWeightG=item.weightG
+        const updatedKeys=new Set([...keysFor(current),identifier])
+        if (updatedKeys.size !== keysFor(current).length) changes.sourceEntryKeys=[...updatedKeys].join('|')
+        if (Object.keys(changes).length) {
+          changes.updatedAt=new Date().toISOString()
+          await database.gear.update(current.id,changes)
+          Object.assign(current,changes)
         }
+      } else {
         const now=new Date().toISOString()
-        const row:LibraryRow={
-          id:crypto.randomUUID(),createdAt:now,updatedAt:now,
-          name:title,brand,model:description,category:item.category.trim().slice(0,500),
+        linked={id:crypto.randomUUID(),createdAt:now,updatedAt:now,
+          name:item.name.trim(),brand:parsed.brand,model:parsed.model,category:item.category.slice(0,500),
+          lengthCm:parsed.lengthCm,widthCm:parsed.widthCm,thicknessCm:parsed.thicknessCm,
+          rValue:parsed.rValue,temperatureHint:parsed.temperatureHint,specifications:parsed.specifications,
+          sourceDescription:item.description,sourceEntryKeys:identifier,
           manufacturerWeightG:null,listedWeightG:item.weightG,
-          photoUrl:photo,productUrl,photoPath:drivePath || '',photoMatch:drivePath ? 'exact' : null,sourceRef:sourceIds.get(list.code)||'',notes:''
-        }
-        await database.gear.add(row)
-        byKey.set(ref,row)
-        if (norm(description).length >= 14) byModel.set(norm(description), [...(byModel.get(norm(description)) ?? []), row])
+          photoUrl:photo,productUrl,photoPath:drivePath,photoMatch:drivePath?'exact':null,
+          sourceRef:sourceIds.get(list.code)||'',notes:''}
+        await database.gear.add(linked)
         added++
-        if (photo) images++
+        if(photo)images++
+        byRaw.set(rawKey,linked)
+        byModel.set(normalizedKey,[...(byModel.get(normalizedKey) ?? []),linked])
+      }
+      bySource.set(identifier,linked)
+      // The user confirmed that entries in these personal lists are owned.
+      // Repeated appearances in different LighterPack lists do NOT add quantities together.
+      const quantity = Number.isInteger(item.quantity) && (item.quantity ?? 0) > 0
+        ? Math.min(999,item.quantity as number) : 1
+      const personal = byOwned.get(linked.id) ?? []
+      if (personal.length) {
+        const first=personal[0]
+        const patch:Record<string,string|number>={}
+        if (first.ownershipStatus !== 'confirmed') patch.ownershipStatus='confirmed'
+        if (typeof first.quantityOwned!=='number' || first.quantityOwned < quantity)
+          patch.quantityOwned=quantity
+        if (Object.keys(patch).length) {
+          patch.updatedAt=new Date().toISOString()
+          await database.ownedGear.update(first.id,patch)
+          Object.assign(first,patch)
+        }
+      } else {
+        const now=new Date().toISOString()
+        const own:LibraryRow={id:crypto.randomUUID(),createdAt:now,updatedAt:now,
+          catalogItemId:linked.id,nickname:parsed.model||item.name.trim(),
+          measuredWeightG:null,quantityOwned:quantity,ownershipStatus:'confirmed',notes:''}
+        await database.ownedGear.add(own)
+        byOwned.set(linked.id,[own])
       }
     }
-    await database.settings.put({key:SETTING,value:importedRevision})
+    await database.settings.put({key:SETTING,value:revision})
     return {added,existing,images}
   })
 }
