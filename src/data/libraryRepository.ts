@@ -70,7 +70,7 @@ export function parseLibraryArchive(text: string): LibraryArchive {
 export async function replaceLibrary(archive: LibraryArchive, database: HikingDB = db): Promise<void> {
   const checked = parseLibraryArchive(JSON.stringify(archive))
   const tables = libraryTables.map(name => database[name])
-  await database.transaction('rw', ...tables, async () => {
+  await database.transaction('rw', tables, async () => {
     for (const table of libraryTables) await database[table].clear()
     for (const table of libraryTables) {
       if (checked.data[table].length) await database[table].bulkAdd(checked.data[table])
