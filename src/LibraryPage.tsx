@@ -176,7 +176,7 @@ export default function LibraryPage() {
       if (!mounted) return
       setSeedStatus(result.alreadyImported ?
         'Исходные записи уже добавлены; фото снаряжения: ' + pictures + ' новых; LighterPack: ' + lighter.added + ' новых' :
-        'Загружено из двух Excel: ' + result.added + ' новых записей; фотографий: ' + pictures + '; LighterPack: ' + lighter.added + ' новых)
+        'Загружено из двух Excel: ' + result.added + ' новых записей; фотографий: ' + pictures + '; LighterPack: ' + lighter.added + ' новых')
     }).catch(error => {
       if (mounted) setSeedStatus('Импорт исходных записей не удался: ' +
         (error instanceof Error ? error.message : 'неизвестная ошибка'))
