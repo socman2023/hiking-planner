@@ -6,7 +6,7 @@ import {
 } from 'lucide-react'
 import {
   childByRoot, definitions, parentKey, rootTabs,
-  getLibraryPhotos, getSeedPhotoPath, type FieldSpec, type LibraryRow, type LibraryTableName, type RootTab,
+  getLibraryPhotos, getSeedPhotoPath, getFullImgurImage, type FieldSpec, type LibraryRow, type LibraryTableName, type RootTab,
 } from './domain/library'
 import {
   deleteLibraryRow, exportLibraryCsv, makeLibraryArchive, parseLibraryArchive,
@@ -24,7 +24,7 @@ type Notice = { text: string; error: boolean }
 const tabInfo: Record<RootTab, string> = {
   foods: 'Продукты питания и их фасовки',
   dishes: 'Рецепты и ингредиенты из продуктового каталога',
-  gear: 'Справочное снаряжение и собственные экземпляры',
+  gear: 'Модели снаряжения; личные экземпляры учитываются отдельно и требуют подтверждения наличия',
   medical: 'Лекарства, изделия и реальные упаковки',
   sources: 'Происхождение сведений и официальные ссылки',
 }
@@ -32,6 +32,7 @@ const enumLabels: Record<string, string> = {
   unknown: 'Неизвестно', dry: 'Сухой продукт', ready: 'Готовый продукт',
   as_packaged: 'Как в упаковке', medicine: 'Лекарство', device: 'Медицинское изделие',
   unreviewed: 'Не проверено', source_recorded: 'Источник указан', user_verified: 'Проверено вручную',
+  package:'Упаковка',piece:'Поштучно',portion:'Порция',confirmed:'Подтверждено',unverified:'Не подтверждено',
 }
 
 function coverFor(row: LibraryRow): string | null {
@@ -39,7 +40,7 @@ function coverFor(row: LibraryRow): string | null {
   if (local) return local
   const path = getSeedPhotoPath(row)
   if (path) return import.meta.env.BASE_URL + path
-  return typeof row.photoUrl === 'string' && /^https:\/\/i\.imgur\.com\/[A-Za-z0-9._-]+\.(?:jpg|jpeg|png|webp)$/i.test(row.photoUrl) ? row.photoUrl : null
+  return getFullImgurImage(row.photoUrl)
 }
 
 function titleOf(table: LibraryTableName, item: LibraryRow): string {
@@ -134,7 +135,7 @@ function LibraryEditor({ editing, library, onClose, onSaved }: {
         </div>
         <form onSubmit={event => void submit(event)}>
           <div className="library-form-fields">
-            {definitions[editing.table].fields.map(spec => {
+            {definitions[editing.table].fields.filter(spec => editing.table !== 'gear' || !['photoUrl','manufacturerWeightG'].includes(spec.key)).map(spec => {
               // Disambiguate the polymorphic catalogItemId reference.
               const actualRows = spec.key === 'catalogItemId' && editing.table === 'medicalPacks' ?
                 { ...library, gear: library.medical } : library
@@ -297,7 +298,7 @@ export default function LibraryPage() {
               {coverFor(item) ? <img src={coverFor(item) ?? ''} alt="" loading="lazy" /> :
                 tab === 'medical' ? '✚' : tab === 'foods' ? '◈' : tab === 'dishes' ? '◉' : tab === 'gear' ? '△' : '↗'}</span>
             <span className="library-entry-body"><strong>{titleOf(tab, item)}</strong>
-              <small>{String(item.category || item.brand || item.provider || item.internationalName || '') || 'Без категории'}</small></span>
+              <small>{tab === 'gear' ? [item.brand, item.model].filter(Boolean).join(' · ') || item.category || 'Без категории' : String(item.category || item.brand || item.provider || item.internationalName || '') || 'Без категории'}</small></span>
             <span className="library-entry-end">{item.sourceRef ? 'Источник ✓' : 'Личная запись'}</span>
           </button>) : <div className="library-empty"><BookOpen size={30}/><h3>{items.length ? 'Ничего не найдено' : 'Пока нет записей'}</h3>
             <p>{items.length ? 'Измените поиск или фильтр.' : 'Добавьте первую запись в этот раздел.'}</p>
@@ -313,7 +314,11 @@ export default function LibraryPage() {
               </div></div>
             <LibraryPhotos key={chosen.id} table={tab} row={chosen} notify={announce}/>
             <dl className="library-attributes">
-              {definitions[tab].fields.filter(field => field.key !== definitions[tab].title).map(field => {
+              {tab === 'gear' && <div><dt>Масса, г</dt>
+                <dd>{chosen.listedWeightG ?? chosen.manufacturerWeightG ?? 'Не указано'}</dd></div>}
+              {definitions[tab].fields.filter(field => field.key !== definitions[tab].title &&
+                (tab !== 'gear' || !['photoUrl','manufacturerWeightG','listedWeightG'].includes(field.key))
+              ).map(field => {
                 const value = chosen[field.key]
                 const href = field.key === 'sourceRef'
                   ? all.sources.find(source => source.id === value)?.url
@@ -337,9 +342,9 @@ export default function LibraryPage() {
                 <div><strong>{childTable === 'ingredients' ?
                   (all.foods.find(p => p.id === row.productId)?.name || 'Продукт не найден') :
                   childTable === 'ownedGear' ? String(row.nickname || 'Экземпляр') : titleOf(childTable, row)}</strong>
-                  <small>{childTable === 'packages' ? 'Нетто: ' + (row.netWeightG ?? 'неизвестно') + ' г' :
+                  <small>{childTable === 'packages' ? (row.unitKind === 'piece' ? 'Масса штуки: ' : 'Нетто: ') + (row.netWeightG ?? 'неизвестно') + ' г' :
                     childTable === 'ingredients' ? (row.rawAmountG ?? 'неизвестно') + ' г' :
-                      childTable === 'ownedGear' ? 'Фактическая масса: ' + (row.measuredWeightG ?? 'неизвестно') + ' г' :
+                      childTable === 'ownedGear' ? (row.ownershipStatus === 'confirmed' ? 'Фактическая масса: ' + (row.measuredWeightG ?? 'неизвестно') + ' г' : 'Наличие не подтверждено') :
                         'Срок годности: ' + (row.expiryDate || 'неизвестен')}</small></div>
                 <div className="library-detail-actions"><button aria-label="Редактировать связанную запись" title="Редактировать" className="icon-button"
                   onClick={() => setEditing({ table: childTable, row })}><Pencil size={16}/></button>

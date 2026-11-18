@@ -28,7 +28,7 @@ export function stripAutoNotes(original: string): string {
   return before.replace(/^Цена: [^\n]*$/, '').trim()
 }
 
-const CLEAN_KEY = 'libraryGeneratedNotesCleanupV2'
+const CLEAN_KEY = 'libraryGeneratedNotesCleanupV4'
 const TABLES: LibraryTableName[] = ['foods', 'packages', 'dishes', 'ingredients', 'gear', 'ownedGear', 'medical', 'medicalPacks', 'sources']
 export async function cleanImportedLibraryNotes(database: HikingDB = db): Promise<number> {
   return database.transaction('rw', [database.settings, ...TABLES.map(name => database[name])], async () => {
@@ -36,10 +36,19 @@ export async function cleanImportedLibraryNotes(database: HikingDB = db): Promis
     let changed = 0
     for (const table of libraryTables) {
       for (const row of await database[table].toArray()) {
-        if (typeof row.notes !== 'string') continue
-        const cleaned = stripAutoNotes(row.notes)
-        if (cleaned !== row.notes) {
-          await database[table].update(row.id, { notes: cleaned, updatedAt: new Date().toISOString() })
+        const changes: Record<string, string | number | null> = {}
+        if (typeof row.notes === 'string') {
+          const cleaned = stripAutoNotes(row.notes)
+          if (cleaned !== row.notes) changes.notes = cleaned
+        }
+        if (table === 'ownedGear' && typeof row.nickname === 'string' &&
+            / — (?:Архыз|Крым) 4 дня$/.test(row.nickname)) {
+          if (!row.ownershipStatus) changes.ownershipStatus = 'unverified'
+          if (row.ownershipStatus !== 'confirmed' && row.measuredWeightG != null) changes.measuredWeightG = null
+        }
+        if (Object.keys(changes).length) {
+          changes.updatedAt = new Date().toISOString()
+          await database[table].update(row.id, changes)
           changed++
         }
       }
