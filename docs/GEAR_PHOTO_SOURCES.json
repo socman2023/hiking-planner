@@ -583,6 +583,12 @@
       "size": 342613,
       "match": "exact"
     },
+    "108": {
+      "file_id": "17ZEjDKvr2clbyAwZ-2iCBuX9FqWcx5pZ",
+      "name": "Splav Readily 6l.jpg",
+      "size": 25947,
+      "match": "exact"
+    },
     "109": {
       "file_id": "11qBYV1TaqrT6TiYGVYhRhj6IZWDjCZ2O",
       "name": "3F UL Gear M.jpg",
@@ -611,8 +617,7 @@
   "remainingWithoutPhoto": [
     51,
     66,
-    78,
-    108
+    78
   ],
   "updatedAt": "2026-11-18"
 }
