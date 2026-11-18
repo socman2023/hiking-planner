@@ -9,5 +9,11 @@ for (const code of codes) {
   console.log('snippet',body.replace(/\s+/g,' ').slice(0,800));
   console.log('data-hints', [...body.matchAll(/<script([^>]*)(?:src="([^"]+)")?[^>]*>/ig)].slice(0,25).map(x=>[x[1],x[2]]).join(' || ').slice(0,1600));
   console.log('known-words', [...body.matchAll(/(backpack|itemName|item_name|category_name|categoryName|chartData|packinglist|packlist|gearlist)/gi)].slice(0,25).map(x=>x[0]).join(','));
+  for (const needle of ['CategoryName', '<tbody', '<table', 'lpItem', 'ItemName', '"weight"', 'item-name', 'itemName', '<img']) {
+    const at=body.indexOf(needle);
+    console.log('NEEDLE',needle,'INDEX',at,at>=0?body.slice(Math.max(0,at-350),at+1450).replace(/\s+/g,' '):'');
+  }
+  console.log('ROWCOUNT', (body.match(/<tr\b/gi)||[]).length, 'IMGCOUNT',(body.match(/<img\b/gi)||[]).length);
+
  } catch(e) {console.log('ERROR',code,String(e));}
 }
