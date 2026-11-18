@@ -52,7 +52,7 @@ function pluralDays(n: number): string {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '') || '/'}>
       <HikingPlanner />
     </BrowserRouter>
   )
