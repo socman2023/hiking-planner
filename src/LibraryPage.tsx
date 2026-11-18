@@ -6,7 +6,7 @@ import {
 } from 'lucide-react'
 import {
   childByRoot, definitions, parentKey, rootTabs,
-  getLibraryPhotos, type FieldSpec, type LibraryRow, type LibraryTableName, type RootTab,
+  getLibraryPhotos, getSeedPhotoPath, type FieldSpec, type LibraryRow, type LibraryTableName, type RootTab,
 } from './domain/library'
 import {
   deleteLibraryRow, exportLibraryCsv, makeLibraryArchive, parseLibraryArchive,
@@ -15,6 +15,7 @@ import {
 import './library.css'
 import { LibraryPhotos } from './LibraryPhotos'
 import { importXlsxCatalog } from './data/importXlsxSeed'
+import { attachVerifiedGearPhotos } from './data/gearPhotoSeed'
 
 type Editor = { table: LibraryTableName; row?: LibraryRow; preset?: Record<string, string> }
 type Notice = { text: string; error: boolean }
@@ -29,6 +30,13 @@ const enumLabels: Record<string, string> = {
   unknown: 'Неизвестно', dry: 'Сухой продукт', ready: 'Готовый продукт',
   as_packaged: 'Как в упаковке', medicine: 'Лекарство', device: 'Медицинское изделие',
   unreviewed: 'Не проверено', source_recorded: 'Источник указан', user_verified: 'Проверено вручную',
+}
+
+function coverFor(row: LibraryRow): string | null {
+  const local = getLibraryPhotos(row)[0]?.src
+  if (local) return local
+  const path = getSeedPhotoPath(row)
+  return path ? import.meta.env.BASE_URL + path : null
 }
 
 function titleOf(table: LibraryTableName, item: LibraryRow): string {
@@ -159,10 +167,12 @@ export default function LibraryPage() {
   useEffect(() => {
     let mounted = true
     setSeedBusy(true)
-    void importXlsxCatalog().then(result => {
+    void importXlsxCatalog().then(async result => {
+      const pictures = await attachVerifiedGearPhotos()
       if (!mounted) return
-      setSeedStatus(result.alreadyImported ? 'Исходные записи уже добавлены' :
-        'Загружено из двух Excel: ' + result.added + ' новых записей')
+      setSeedStatus(result.alreadyImported ?
+        'Исходные записи уже добавлены; фото снаряжения: ' + pictures + ' новых' :
+        'Загружено из двух Excel: ' + result.added + ' новых записей; фотографий: ' + pictures)
     }).catch(error => {
       if (mounted) setSeedStatus('Импорт исходных записей не удался: ' +
         (error instanceof Error ? error.message : 'неизвестная ошибка'))
@@ -173,8 +183,9 @@ export default function LibraryPage() {
     try {
       setSeedBusy(true)
       const result = await importXlsxCatalog(true)
+      const photoCount = await attachVerifiedGearPhotos(true)
       setSeedStatus('Сверка завершена: добавлено ' + result.added +
-        ', уже было ' + result.existing + '. Существующие записи не заменены.')
+        ', уже было ' + result.existing + '; добавлено фотографий: ' + photoCount + '. Существующие записи не заменены.')
     } catch(error) { setSeedStatus(error instanceof Error ? error.message : 'Ошибка импорта') }
     finally { setSeedBusy(false) }
   }
@@ -250,7 +261,7 @@ export default function LibraryPage() {
 
       <section className="library-seed-banner" aria-label="Исходные данные из Excel">
         <div><strong>Каталоги из «Крым — 4 дня» и «Архыз — 4 дня»</strong>
-          <p>43 продукта, 43 фасовки, 113 строк снаряжения (111 уникальных после объединения повторов), 27 медицинских карточек, 54 исторические записи аптечки и 9 источников. Данные добавляются без замены имеющихся записей.</p>
+          <p>43 продукта, 43 фасовки, 113 строк снаряжения (111 уникальных после объединения повторов), 27 медицинских карточек, 54 исторические записи аптечки и 9 источников. Данные добавляются без замены имеющихся записей. 50 проверенных фотографий снаряжения взяты из исправленной папки Google Drive.</p>
           <small role="status">{seedBusy ? 'Проверяем встроенный каталог…' : seedStatus || 'Подготовка каталога…'}</small></div>
         <button type="button" className="button secondary" onClick={() => void repeatSeedImport()} disabled={seedBusy}>
           <ArchiveRestore size={17}/> Сверить и добавить недостающее
@@ -277,8 +288,8 @@ export default function LibraryPage() {
         <section className="library-list" aria-label="Список записей">
           {visible.length ? visible.map(item => <button type="button" key={item.id}
             className={'library-entry' + (selected === item.id ? ' selected' : '')} onClick={() => setSelected(item.id)}>
-            <span className={'library-entry-icon' + (getLibraryPhotos(item).length ? ' photo-thumb' : '')}>
-              {getLibraryPhotos(item)[0] ? <img src={getLibraryPhotos(item)[0].src} alt="" loading="lazy" /> :
+            <span className={'library-entry-icon' + (coverFor(item) ? ' photo-thumb' : '')}>
+              {coverFor(item) ? <img src={coverFor(item) ?? ''} alt="" loading="lazy" /> :
                 tab === 'medical' ? '✚' : tab === 'foods' ? '◈' : tab === 'dishes' ? '◉' : tab === 'gear' ? '△' : '↗'}</span>
             <span className="library-entry-body"><strong>{titleOf(tab, item)}</strong>
               <small>{String(item.category || item.brand || item.provider || item.internationalName || '') || 'Без категории'}</small></span>
