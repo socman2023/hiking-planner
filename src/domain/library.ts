@@ -43,7 +43,7 @@ export const definitions: Record<LibraryTableName, LibraryDefinition> = {
   packages: {
     label: 'Фасовки и единицы', singular: 'фасовку или единицу', title: 'label',
     fields: [field('foodProductId', 'Продукт', 'select', true), field('label', 'Название фасовки / единицы', 'text', true),
-      { ...field('unitKind','Тип', 'select'), options: ['package','piece','portion'] },
+      { ...field('unitKind','Тип', 'select'), options: ['package','unit','piece','portion'] },
       grams('netWeightG', 'Масса фасовки или единицы, г'), grams('packageWeightG', 'Масса упаковки, г'),
       grams('grossWeightG', 'Полная масса, г'), field('barcode', 'Штрихкод'), sourceRef],
   },

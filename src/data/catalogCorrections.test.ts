@@ -7,7 +7,8 @@ it('corrects the sourced 3 g Sula sweet to a piece, without touching unknown pac
   const db=new HikingDB('sula-test-'+crypto.randomUUID())
   try {
     const food=await saveLibraryRow('foods',{name:'Карамель леденцовая',brand:'Sula'},undefined,db)
-    const one=await saveLibraryRow('packages',{label:'Упаковка 3 г',foodProductId:food.id,netWeightG:3},undefined,db)
+    const source=await saveLibraryRow('sources',{title:'Архыз 4 дня',provider:'Пользовательский файл'},undefined,db)
+    const one=await saveLibraryRow('packages',{label:'Упаковка 3 г',foodProductId:food.id,netWeightG:3,sourceRef:source.id},undefined,db)
     const bulk=await saveLibraryRow('packages',{label:'Коробка 120 г',foodProductId:food.id,netWeightG:120},undefined,db)
     expect(await correctImportedFoodUnits(db)).toBe(1)
     expect((await db.packages.get(one.id))?.unitKind).toBe('piece')

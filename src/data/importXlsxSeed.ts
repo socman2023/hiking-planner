@@ -24,7 +24,12 @@ function fingerprint(table: LibraryTableName, row: LibraryRow): string {
     case 'gear': return [normalize(row.name), normalize(row.model)].join('|')
     case 'medical': return [normalize(row.tradeName), normalize(row.kind)].join('|')
     case 'dishes': return normalize(row.title)
-    case 'packages': return [row.foodProductId, normalize(row.label), row.netWeightG].join('|')
+    case 'packages': {
+      const label=normalize(row.label)
+      const generated=/^(?:упаковка|единица)\s+[\d.,]+\s*г$/.test(label) ||
+        /^1 леденец \(3 г\)$/.test(label)
+      return [row.foodProductId,generated ? '#source-unit' : label,row.netWeightG].join('|')
+    }
     case 'ingredients': return [row.dishId, row.productId, row.rawAmountG].join('|')
     case 'ownedGear': return [row.catalogItemId, normalize(row.nickname)].join('|')
     case 'medicalPacks': return [row.catalogItemId, normalize(row.label), row.expiryDate].join('|')
