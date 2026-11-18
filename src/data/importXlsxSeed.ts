@@ -35,7 +35,7 @@ export async function importXlsxCatalog(force = false, database: HikingDB = db):
   if (typeof DecompressionStream === 'undefined') {
     throw new Error('Браузер не поддерживает распаковку каталога. Обновите браузер.')
   }
-  const response = await fetch(import.meta.env.BASE_URL + 'seed/catalog.json.gz')
+  const response = await fetch(import.meta.env.BASE_URL + 'seed/catalog.bin')
   if (!response.ok || !response.body) throw new Error('Не удалось загрузить исходный каталог')
   const decompressed = response.body.pipeThrough(new DecompressionStream('gzip'))
   const raw: unknown = await new Response(decompressed).json()
