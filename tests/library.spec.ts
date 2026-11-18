@@ -27,6 +27,7 @@ test('создать медицинское изделие и конкретну
   await page.getByRole('button', { name: /Стерильный бинт/ }).click()
   await page.getByRole('button', { name: 'Добавить', exact: true }).click()
   await page.getByLabel('Название упаковки').fill('Домашняя упаковка')
+  await page.getByLabel('Единицы').fill('шт.')
   await page.getByLabel('Годен до').fill('2028-12-01')
   await page.getByRole('dialog').getByRole('button', { name: 'Сохранить' }).click()
   await expect(page.getByText('Срок годности: 2028-12-01')).toBeVisible()
