@@ -41,9 +41,10 @@ export const definitions: Record<LibraryTableName, LibraryDefinition> = {
       field('barcode', 'Штрихкод'), sourceRef, notes],
   },
   packages: {
-    label: 'Фасовки', singular: 'фасовку', title: 'label',
-    fields: [field('foodProductId', 'Продукт', 'select', true), field('label', 'Название фасовки', 'text', true),
-      grams('netWeightG', 'Масса продукта, г'), grams('packageWeightG', 'Масса упаковки, г'),
+    label: 'Фасовки и единицы', singular: 'фасовку или единицу', title: 'label',
+    fields: [field('foodProductId', 'Продукт', 'select', true), field('label', 'Название фасовки / единицы', 'text', true),
+      { ...field('unitKind','Тип', 'select'), options: ['package','piece','portion'] },
+      grams('netWeightG', 'Масса фасовки или единицы, г'), grams('packageWeightG', 'Масса упаковки, г'),
       grams('grossWeightG', 'Полная масса, г'), field('barcode', 'Штрихкод'), sourceRef],
   },
   dishes: {
@@ -63,11 +64,12 @@ export const definitions: Record<LibraryTableName, LibraryDefinition> = {
       grams('listedWeightG', 'Вес из походного списка, г'), field('photoUrl', 'URL фотографии', 'url'), field('productUrl', 'Страница товара', 'url'), sourceRef, notes],
   },
   ownedGear: {
-    label: 'Свои вещи', singular: 'экземпляр', title: 'nickname',
+    label: 'Личные экземпляры', singular: 'экземпляр', title: 'nickname',
     fields: [field('catalogItemId', 'Каталожный предмет', 'select', true),
       field('nickname', 'Собственное название', 'text', true),
       grams('measuredWeightG', 'Фактическая масса, г'),
-      field('quantityOwned', 'Количество', 'number', true), notes],
+      field('quantityOwned', 'Количество', 'number', true),
+      { ...field('ownershipStatus','Наличие', 'select'), options:['unverified','confirmed'] }, notes],
   },
   medical: {
     label: 'Аптечный каталог', singular: 'позицию', title: 'tradeName',
@@ -151,6 +153,11 @@ export function validateRow(table: LibraryTableName, input: LibraryRow): void {
       if (spec.options && !spec.options.includes(value)) throw new Error('Недопустимый вариант: ' + spec.label)
     }
   }
+}
+export function getFullImgurImage(value: unknown): string | null {
+  if (typeof value !== 'string' || !/^https:\/\/i\.imgur\.com\/[A-Za-z0-9]{7,8}\.(?:jpg|jpeg|png|webp)$/i.test(value)) return null
+  // LighterPack supplies 90px 's' thumbnails. Show originals instead.
+  return value.replace(/([A-Za-z0-9]{7})s(\.(?:jpg|jpeg|png|webp))$/i,'$1$2')
 }
 export const MAX_PHOTOS = 4
 export const MAX_PHOTO_DATA_CHARS = 1_300_000

@@ -1,6 +1,6 @@
 import { useState, type ChangeEvent } from 'react'
 import { Camera, ImagePlus, Trash2 } from 'lucide-react'
-import { getLibraryPhotos, getSeedPhotoPath, MAX_PHOTOS, type LibraryPhoto, type LibraryRow, type LibraryTableName } from './domain/library'
+import { getLibraryPhotos, getSeedPhotoPath, getFullImgurImage, MAX_PHOTOS, type LibraryPhoto, type LibraryRow, type LibraryTableName } from './domain/library'
 import { saveLibraryPhotos } from './data/libraryRepository'
 import './library-photos.css'
 
@@ -34,8 +34,7 @@ export function LibraryPhotos({ table, row, notify }: {
   const [busy, setBusy] = useState(false)
   const localPhotos = getLibraryPhotos(row)
   const publicPath = getSeedPhotoPath(row)
-  const external = typeof row.photoUrl === 'string' && /^https:\/\/i\.imgur\.com\/[A-Za-z0-9._-]+\.(?:jpg|jpeg|png|webp)$/i.test(row.photoUrl)
-    ? row.photoUrl : null
+  const external = getFullImgurImage(row.photoUrl)
   const showPublic = localPhotos.length === 0 && !!publicPath
   const showExternal = localPhotos.length === 0 && !publicPath && !!external
   const illustrative = row.photoMatch === 'illustrative'

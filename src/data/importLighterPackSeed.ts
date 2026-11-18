@@ -1,7 +1,8 @@
 import { db, type HikingDB } from './db'
 import type { LibraryRow } from '../domain/library'
+import { detectGearBrand } from '../domain/gearBrand'
 
-const VERSION = 'lighterpack-2026-11-18-v3-links'
+const VERSION = 'lighterpack-2026-11-18-v4-brands'
 const SETTING = 'lighterpackSeedVersion'
 interface LPItem {
   itemId: string
@@ -82,10 +83,12 @@ export async function importLighterPackCatalog(force = false, database: HikingDB
         const candidates = byModel.get(norm(description)) ?? []
         // Only merge a differently named source item when its detailed model matches uniquely.
         const current=byKey.get(ref) ?? (description.length >= 14 && candidates.length === 1 ? candidates[0] : undefined)
+        const brand = detectGearBrand(description,title)
         if (current) {
           existing++
           const changes: Record<string,string|number>={}
           if (photo && !current.photoUrl) { changes.photoUrl=photo; images++ }
+          if (brand && !current.brand) changes.brand=brand
           if (productUrl && !current.productUrl) changes.productUrl=productUrl
           if (typeof item.weightG==='number' && current.listedWeightG == null) {
             changes.listedWeightG=item.weightG
@@ -100,7 +103,7 @@ export async function importLighterPackCatalog(force = false, database: HikingDB
         const now=new Date().toISOString()
         const row:LibraryRow={
           id:crypto.randomUUID(),createdAt:now,updatedAt:now,
-          name:title,brand:'',model:description,category:item.category.trim().slice(0,500),
+          name:title,brand,model:description,category:item.category.trim().slice(0,500),
           manufacturerWeightG:null,listedWeightG:item.weightG,
           photoUrl:photo,productUrl,sourceRef:sourceIds.get(list.code)||'',notes:''
         }
