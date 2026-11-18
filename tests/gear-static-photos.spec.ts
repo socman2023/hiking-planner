@@ -20,6 +20,7 @@ test('verified model image is attached on initial load and survives editing and 
   await expect(page.locator('.library-seed-banner small')).toContainText('Исходные записи уже добавлены')
   await page.getByRole('tab', { name: /Снаряжение/ }).click()
   await page.getByLabel('Поиск в библиотеке').fill('Splav Cowl')
-  await page.locator('.library-entry', { hasText: 'тент' }).last().click()
+  // Editing updates the record timestamp, so it sorts before the later LighterPack duplicate.
+  await page.locator('.library-entry', { hasText: 'тент' }).first().click()
   await expect(page.getByRole('img', { name: 'Фото: Фото из каталога снаряжения' })).toBeVisible()
 })
