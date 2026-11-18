@@ -24,7 +24,7 @@ test('photograph survives page reload and record edits', async ({ page }) => {
   await page.getByRole('button', { name: /рюкзак 48 л/ }).first().click()
   // Small valid PNG, converted to a compressed WebP/PNG thumbnail in the browser.
   const pixel = Buffer.from(
-    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9WlEs44AAAAASUVORK5CYII=', 'base64')
+    'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAGUlEQVR4nGMM27GMgRTARJLqUQ2jGoaUBgBn4wHUMdljYgAAAABJRU5ErkJggg==', 'base64')
   await page.getByLabel('Выбрать фотографии').setInputFiles({ name:'test-gear.png', mimeType:'image/png', buffer:pixel })
   await expect(page.getByRole('img', { name:'Фото: test-gear.png' })).toBeVisible()
   await page.getByRole('button', { name:'Редактировать запись', exact:true }).click()
