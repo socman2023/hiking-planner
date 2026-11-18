@@ -313,8 +313,17 @@ export default function LibraryPage() {
               </div></div>
             <LibraryPhotos key={chosen.id} table={tab} row={chosen} notify={announce}/>
             <dl className="library-attributes">
-              {definitions[tab].fields.filter(field => field.key !== definitions[tab].title).map(field =>
-                <div key={field.key}><dt>{field.label}</dt><dd>{showValue(field, chosen[field.key], all)}</dd></div>)}
+              {definitions[tab].fields.filter(field => field.key !== definitions[tab].title).map(field => {
+                const value = chosen[field.key]
+                const href = field.key === 'sourceRef'
+                  ? all.sources.find(source => source.id === value)?.url
+                  : field.type === 'url' ? value : ''
+                const validLink = typeof href === 'string' && /^https?:\/\//i.test(href)
+                return <div key={field.key}><dt>{field.label}</dt>
+                  <dd>{validLink ? <a href={href} target="_blank" rel="noopener noreferrer">
+                    {field.key === 'sourceRef' ? showValue(field, value, all) : 'Открыть ссылку'}
+                  </a> : showValue(field, value, all)}</dd></div>
+              })}
             </dl>
             <div className="library-record-meta">Изменено: {new Date(chosen.updatedAt).toLocaleDateString('ru-RU')}</div>
             {childTable && <div className="library-related">
