@@ -52,7 +52,7 @@
 .library-import-preview p { margin:9px 0; }
 .library-footer-note { margin-top:18px; color:#8baeb0; display:flex; gap:9px; line-height:1.5; font-size:11px; }
 .library-footer-note svg { flex-shrink:0; }
-.library-modal-backdrop { position:fixed; inset:0; display:grid; place-items:center; padding:20px; z-index:100; background:rgba(0,8,15,.83); overflow-y:auto; }
+.library-modal-backdrop { position:fixed; inset:0; display:grid; place-items:center; padding:20px; z-index:9999; background:rgba(0,8,15,.83); overflow-y:auto; }
 .library-modal { width:min(100%,680px); max-height:min(90vh,900px); overflow-y:auto; border:1px solid #34746f; border-radius:17px; background:#112d37; padding:25px; box-shadow:0 20px 65px #0009; }
 .library-modal-top { display:flex; align-items:start; justify-content:space-between; gap:12px; margin-bottom:15px; }
 .library-modal-top h2 { font-size:24px; margin:0; }
