@@ -16,6 +16,7 @@ import './library.css'
 import { LibraryPhotos } from './LibraryPhotos'
 import { importXlsxCatalog } from './data/importXlsxSeed'
 import { cleanImportedLibraryNotes } from './data/cleanLibraryNotes'
+import { correctImportedFoodUnits } from './data/catalogCorrections'
 import { attachVerifiedGearPhotos } from './data/gearPhotoSeed'
 import { importLighterPackCatalog } from './data/importLighterPackSeed'
 
@@ -172,6 +173,7 @@ export default function LibraryPage() {
     let mounted = true
     setSeedBusy(true)
     void cleanImportedLibraryNotes().then(() => importXlsxCatalog()).then(async result => {
+      await correctImportedFoodUnits()
       const pictures = await attachVerifiedGearPhotos()
       const lighter = await importLighterPackCatalog()
       if (!mounted) return
@@ -188,6 +190,7 @@ export default function LibraryPage() {
     try {
       setSeedBusy(true)
       const result = await importXlsxCatalog(true)
+      await correctImportedFoodUnits()
       const photoCount = await attachVerifiedGearPhotos(true)
       const lighter = await importLighterPackCatalog(true)
       setSeedStatus('Сверка завершена: добавлено ' + result.added +
