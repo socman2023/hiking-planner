@@ -8,6 +8,9 @@ const GENERATED = [
   'Связанная ссылка LighterPack из Excel сохранена в источниках.',
   'Импортировано из похода «',
   'Учётный вес из исторического списка:',
+  'Исторический перечень аптечки из приложенной Excel-книги.',
+  'Количество и срок годности приведены по старой походной таблице;',
+  'URL сохранён, но в текущей среде не удалось автоматически получить содержимое страницы или изображений.',
   'Это не подтверждённая масса производителя',
 ]
 export function stripAutoNotes(original: string): string {
@@ -16,7 +19,12 @@ export function stripAutoNotes(original: string): string {
   const positions = GENERATED.map(marker => note.indexOf(marker)).filter(i => i >= 0)
   const first = Math.min(...positions)
   const before = note.slice(0, first).trim()
-  // Previous parser put a generated price ahead of other boilerplate.
+  if (note.startsWith('Исторический перечень аптечки из приложенной Excel-книги.')) {
+    return note.replace(/^Исторический перечень аптечки из приложенной Excel-книги\. Не является актуальной инструкцией или назначением\.\s*/, '').trim()
+  }
+  if (note.startsWith('Количество и срок годности приведены по старой походной таблице;')) {
+    return note.replace(/^Количество и срок годности приведены по старой походной таблице; текущее наличие и пригодность не подтверждены\.\s*/, '').trim()
+  }
   return before.replace(/^Цена: [^\n]*$/, '').trim()
 }
 

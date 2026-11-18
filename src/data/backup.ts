@@ -3,7 +3,7 @@ import { libraryTables, type LibraryRow } from '../domain/library'
 import { readLibrary, validateLibraryData } from './libraryRepository'
 import {
   activityLabels, addDays, dayKindLabels, statusLabels, validISODate,
-  type AppSetting, type Trip, type TripDay,
+  type AppSetting, type Trip, type TripDay, type TripGearItem,
 } from '../domain/trips'
 
 export interface BackupV1 {
@@ -23,10 +23,16 @@ export interface BackupV2 {
   exportedAt: string
   data: BackupV1['data'] & { library: Record<(typeof libraryTables)[number], LibraryRow[]> }
 }
-export type AnyBackup = BackupV1 | BackupV2
+export interface BackupV3 {
+  format: 'hiking-planner-backup'
+  schemaVersion: 3
+  exportedAt: string
+  data: BackupV2['data'] & { tripGear: TripGearItem[] }
+}
+export type AnyBackup = BackupV1 | BackupV2 | BackupV3
 const MAX_FILE_BYTES = 60 * 1024 * 1024
 
-export async function makeBackup(database: HikingDB = db): Promise<BackupV2> {
+export async function makeBackup(database: HikingDB = db): Promise<BackupV3> {
   const [trips, days, settings] = await database.transaction(
     'r', database.trips, database.days, database.settings,
     async () => Promise.all([
@@ -35,9 +41,9 @@ export async function makeBackup(database: HikingDB = db): Promise<BackupV2> {
   )
   return {
     format: 'hiking-planner-backup',
-    schemaVersion: 2,
+    schemaVersion: 3,
     exportedAt: new Date().toISOString(),
-    data: { trips, days, settings, library: await readLibrary(database) },
+    data: { trips, days, settings, library: await readLibrary(database), tripGear: await database.tripGear.toArray() },
   }
 }
 
@@ -81,7 +87,7 @@ export function parseBackup(text: string): AnyBackup {
   }
   let raw: unknown
   try { raw = JSON.parse(text) } catch { throw new Error('Файл не является корректным JSON') }
-  if (!record(raw) || raw.format !== 'hiking-planner-backup' || (raw.schemaVersion !== 1 && raw.schemaVersion !== 2) ||
+  if (!record(raw) || raw.format !== 'hiking-planner-backup' || (raw.schemaVersion !== 1 && raw.schemaVersion !== 2 && raw.schemaVersion !== 3) ||
       !dateTime(raw.exportedAt) || !record(raw.data)) {
     throw new Error('Неизвестный формат или версия резервной копии')
   }
@@ -110,16 +116,39 @@ export function parseBackup(text: string): AnyBackup {
       throw new Error('Нарушена последовательность календарных дней похода «' + trip.title + '»')
     }
   }
-  if (raw.schemaVersion === 2) validateLibraryData(raw.data.library)
+  if (raw.schemaVersion === 2 || raw.schemaVersion === 3) validateLibraryData(raw.data.library)
+  if (raw.schemaVersion === 3) {
+    const assigned = raw.data.tripGear
+    if (!Array.isArray(assigned) || assigned.length > 20000) throw new Error('Неверный список снаряжения походов')
+    const ids = new Set<string>()
+    const gearIds = new Set((raw.data.library as {gear: Array<{id:string}>}).gear.map(g => g.id))
+    for (const row of assigned) {
+      if (!record(row) || !string(row.id) || !row.id || ids.has(row.id) ||
+        !string(row.tripId) || !tripIndex.has(row.tripId) ||
+        !string(row.gearId) || !gearIds.has(row.gearId) ||
+        typeof row.quantity !== 'number' || !Number.isInteger(row.quantity) || row.quantity < 1 || row.quantity > 99 ||
+        !string(row.placement) || row.placement.length > 120 ||
+        !string(row.notes) || row.notes.length > 1000 ||
+        !string(row.carryMode) || !['pack', 'worn', 'outside'].includes(row.carryMode) ||
+        typeof row.packed !== 'boolean' || !dateTime(row.createdAt) || !dateTime(row.updatedAt)) {
+        throw new Error('Некорректная запись снаряжения похода')
+      }
+      ids.add(row.id)
+    }
+  }
   return raw as unknown as AnyBackup
 }
 
 export async function restoreBackup(backup: AnyBackup, database: HikingDB = db): Promise<void> {
   const checked = parseBackup(JSON.stringify(backup))
-  await database.transaction('rw', [database.trips, database.days, database.settings,
+  await database.transaction('rw', [database.trips, database.days, database.settings, database.tripGear,
     ...libraryTables.map(table => database[table])], async () => {
+    if (checked.schemaVersion !== 3 && await database.tripGear.count()) {
+      throw new Error('Архив старой версии не содержит снаряжение походов. Сначала сохраните резервную копию версии 3.')
+    }
+    await database.tripGear.clear()
     await Promise.all([database.trips.clear(), database.days.clear(), database.settings.clear()])
-    if (checked.schemaVersion === 2) {
+    if (checked.schemaVersion === 2 || checked.schemaVersion === 3) {
       for (const table of libraryTables) await database[table].clear()
       for (const table of libraryTables) {
         if (checked.data.library[table].length) await database[table].bulkAdd(checked.data.library[table])
@@ -128,6 +157,7 @@ export async function restoreBackup(backup: AnyBackup, database: HikingDB = db):
     if (checked.data.trips.length) await database.trips.bulkAdd(checked.data.trips)
     if (checked.data.days.length) await database.days.bulkAdd(checked.data.days)
     if (checked.data.settings.length) await database.settings.bulkAdd(checked.data.settings)
+    if (checked.schemaVersion === 3 && checked.data.tripGear.length) await database.tripGear.bulkAdd(checked.data.tripGear)
   })
 }
 
