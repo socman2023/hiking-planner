@@ -34,10 +34,14 @@ export function LibraryPhotos({ table, row, notify }: {
   const [busy, setBusy] = useState(false)
   const localPhotos = getLibraryPhotos(row)
   const publicPath = getSeedPhotoPath(row)
+  const external = typeof row.photoUrl === 'string' && /^https:\/\/i\.imgur\.com\/[A-Za-z0-9._-]+\.(?:jpg|jpeg|png|webp)$/i.test(row.photoUrl)
+    ? row.photoUrl : null
   const showPublic = localPhotos.length === 0 && !!publicPath
+  const showExternal = localPhotos.length === 0 && !publicPath && !!external
   const illustrative = row.photoMatch === 'illustrative'
   const photos: LibraryPhoto[] = showPublic && publicPath ?
-    [{ src: import.meta.env.BASE_URL + publicPath, name: illustrative ? 'Иллюстрация типа снаряжения' : 'Фото из каталога снаряжения' }] : localPhotos
+    [{ src: import.meta.env.BASE_URL + publicPath, name: illustrative ? 'Иллюстрация типа снаряжения' : 'Фото из каталога снаряжения' }] :
+    showExternal && external ? [{ src: external, name: 'Фото из LighterPack' }] : localPhotos
   async function upload(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? [])
     event.target.value = ''
@@ -75,10 +79,11 @@ export function LibraryPhotos({ table, row, notify }: {
       {photos.map((p, i) => <figure key={i} className="library-photo-item">
         <img loading="lazy" src={p.src} alt={'Фото: ' + p.name}/>
         <figcaption title={p.name}>{p.name}</figcaption>
-        {!showPublic && <button type="button" className="library-photo-remove" title="Удалить"
+        {!showPublic && !showExternal && <button type="button" className="library-photo-remove" title="Удалить"
           aria-label={'Удалить фото ' + (i + 1)} disabled={busy} onClick={() => void remove(i)}><Trash2 size={15}/></button>}
       </figure>)}
     </div> : <div className="library-photo-empty"><Camera size={25}/><span>Фотографии пока не добавлены</span></div>}
+    {showExternal && <p className="library-photo-caption">Фото из LighterPack. Для автономного просмотра загрузите свою копию снимка.</p>}
     {showPublic && <p className="library-photo-caption">{illustrative ? 'Типовое фото: точная модель по подписи файла не подтверждена.' : 'Фото из предоставленной папки Google Drive.'} Свой снимок можно добавить вместо него.</p>}
     <p className="library-photo-caption">JPG/PNG/WebP до 8 МБ. Пользовательские фото уменьшаются до 640 px и хранятся в браузере; JSON-бэкап включает их.</p>
   </section>

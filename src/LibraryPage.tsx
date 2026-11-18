@@ -17,6 +17,7 @@ import { LibraryPhotos } from './LibraryPhotos'
 import { importXlsxCatalog } from './data/importXlsxSeed'
 import { cleanImportedLibraryNotes } from './data/cleanLibraryNotes'
 import { attachVerifiedGearPhotos } from './data/gearPhotoSeed'
+import { importLighterPackCatalog } from './data/importLighterPackSeed'
 
 type Editor = { table: LibraryTableName; row?: LibraryRow; preset?: Record<string, string> }
 type Notice = { text: string; error: boolean }
@@ -37,7 +38,8 @@ function coverFor(row: LibraryRow): string | null {
   const local = getLibraryPhotos(row)[0]?.src
   if (local) return local
   const path = getSeedPhotoPath(row)
-  return path ? import.meta.env.BASE_URL + path : null
+  if (path) return import.meta.env.BASE_URL + path
+  return typeof row.photoUrl === 'string' && /^https:\/\/i\.imgur\.com\/[A-Za-z0-9._-]+\.(?:jpg|jpeg|png|webp)$/i.test(row.photoUrl) ? row.photoUrl : null
 }
 
 function titleOf(table: LibraryTableName, item: LibraryRow): string {
@@ -170,10 +172,11 @@ export default function LibraryPage() {
     setSeedBusy(true)
     void cleanImportedLibraryNotes().then(() => importXlsxCatalog()).then(async result => {
       const pictures = await attachVerifiedGearPhotos()
+      const lighter = await importLighterPackCatalog()
       if (!mounted) return
       setSeedStatus(result.alreadyImported ?
-        'Исходные записи уже добавлены; фото снаряжения: ' + pictures + ' новых' :
-        'Загружено из двух Excel: ' + result.added + ' новых записей; фотографий: ' + pictures)
+        'Исходные записи уже добавлены; фото снаряжения: ' + pictures + ' новых; LighterPack: ' + lighter.added + ' новых' :
+        'Загружено из двух Excel: ' + result.added + ' новых записей; фотографий: ' + pictures + '; LighterPack: ' + lighter.added + ' новых)
     }).catch(error => {
       if (mounted) setSeedStatus('Импорт исходных записей не удался: ' +
         (error instanceof Error ? error.message : 'неизвестная ошибка'))
@@ -185,8 +188,9 @@ export default function LibraryPage() {
       setSeedBusy(true)
       const result = await importXlsxCatalog(true)
       const photoCount = await attachVerifiedGearPhotos(true)
+      const lighter = await importLighterPackCatalog(true)
       setSeedStatus('Сверка завершена: добавлено ' + result.added +
-        ', уже было ' + result.existing + '; добавлено фотографий: ' + photoCount + '. Существующие записи не заменены.')
+        ', уже было ' + result.existing + '; добавлено фотографий: ' + photoCount + '; LighterPack: ' + lighter.added + '. Существующие записи не заменены.')
     } catch(error) { setSeedStatus(error instanceof Error ? error.message : 'Ошибка импорта') }
     finally { setSeedBusy(false) }
   }
