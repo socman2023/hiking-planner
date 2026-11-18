@@ -1,7 +1,7 @@
 import { db, type HikingDB } from './db'
 import type { LibraryRow } from '../domain/library'
 
-const VERSION = 'lighterpack-2026-11-18-v1'
+const VERSION = 'lighterpack-2026-11-18-v2-model-matching'
 const SETTING = 'lighterpackSeedVersion'
 interface LPItem {
   itemId: string
@@ -48,6 +48,12 @@ export async function importLighterPackCatalog(force = false, database: HikingDB
     }
     const gear = await database.gear.toArray()
     const byKey = new Map<string, LibraryRow>(gear.map(item => [key(item.name, item.model), item]))
+    const byModel = new Map<string, LibraryRow[]>()
+    for (const row of gear) {
+      const model = norm(row.model)
+      if (model.length < 14) continue
+      byModel.set(model, [...(byModel.get(model) ?? []), row])
+    }
     const sources = await database.sources.toArray()
     const sourceIds = new Map<string,string>()
     for (const list of data.lists) {
@@ -69,7 +75,9 @@ export async function importLighterPackCatalog(force = false, database: HikingDB
         const description=item.description.trim()
         const ref=key(title,description)
         const photo=validPhoto(item.photoUrl || '') ? item.photoUrl : ''
-        const current=byKey.get(ref)
+        const candidates = byModel.get(norm(description)) ?? []
+        // Only merge a differently named source item when its detailed model matches uniquely.
+        const current=byKey.get(ref) ?? (description.length >= 14 && candidates.length === 1 ? candidates[0] : undefined)
         if (current) {
           existing++
           const changes: Record<string,string|number>={}
@@ -93,6 +101,7 @@ export async function importLighterPackCatalog(force = false, database: HikingDB
         }
         await database.gear.add(row)
         byKey.set(ref,row)
+        if (norm(description).length >= 14) byModel.set(norm(description), [...(byModel.get(norm(description)) ?? []), row])
         added++
         if (photo) images++
       }
