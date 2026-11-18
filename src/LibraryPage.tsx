@@ -17,7 +17,7 @@ import { LibraryPhotos } from './LibraryPhotos'
 import { importXlsxCatalog } from './data/importXlsxSeed'
 import { cleanImportedLibraryNotes } from './data/cleanLibraryNotes'
 import { correctImportedFoodUnits } from './data/catalogCorrections'
-import { correctImportedGearFields, correctJetboilBrand } from './data/gearCorrections'
+import { correctImportedGearFields, correctJetboilBrand, confirmSpreadsheetGearOwnership } from './data/gearCorrections'
 import { attachVerifiedGearPhotos } from './data/gearPhotoSeed'
 import { importLighterPackCatalog } from './data/importLighterPackSeed'
 
@@ -181,6 +181,7 @@ export default function LibraryPage() {
       await correctJetboilBrand()
       const pictures = await attachVerifiedGearPhotos()
       const lighter = await importLighterPackCatalog()
+      await confirmSpreadsheetGearOwnership()
       if (!mounted) return
       setSeedStatus(result.alreadyImported ?
         'Исходные записи уже добавлены; фото снаряжения: ' + pictures + ' новых; LighterPack: ' + lighter.added + ' новых' :
@@ -199,6 +200,7 @@ export default function LibraryPage() {
       await correctImportedGearFields()
       const photoCount = await attachVerifiedGearPhotos(true)
       const lighter = await importLighterPackCatalog(true)
+      await confirmSpreadsheetGearOwnership()
       setSeedStatus('Сверка завершена: добавлено ' + result.added +
         ', уже было ' + result.existing + '; добавлено фотографий: ' + photoCount + '; LighterPack: ' + lighter.added + '. Существующие записи не заменены.')
     } catch(error) { setSeedStatus(error instanceof Error ? error.message : 'Ошибка импорта') }
@@ -355,7 +357,9 @@ export default function LibraryPage() {
                   childTable === 'ownedGear' ? String(row.nickname || 'Экземпляр') : titleOf(childTable, row)}</strong>
                   <small>{childTable === 'packages' ? (row.unitKind === 'piece' ? 'Масса штуки: ' : 'Нетто: ') + (row.netWeightG ?? 'неизвестно') + ' г' :
                     childTable === 'ingredients' ? (row.rawAmountG ?? 'неизвестно') + ' г' :
-                      childTable === 'ownedGear' ? (row.ownershipStatus === 'confirmed' ? 'Фактическая масса: ' + (row.measuredWeightG ?? 'неизвестно') + ' г' : 'Наличие не подтверждено') :
+                      childTable === 'ownedGear' ? (row.ownershipStatus === 'confirmed' ? 'В наличии: ' + (row.quantityOwned || 1) + ' шт.' +
+                      (typeof row.measuredWeightG === 'number' ? ' · измеренный вес: ' + row.measuredWeightG + ' г' : '') :
+                      'Наличие не указано') :
                         'Срок годности: ' + (row.expiryDate || 'неизвестен')}</small></div>
                 <div className="library-detail-actions"><button aria-label="Редактировать связанную запись" title="Редактировать" className="icon-button"
                   onClick={() => setEditing({ table: childTable, row })}><Pencil size={16}/></button>
