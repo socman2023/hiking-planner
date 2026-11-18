@@ -256,6 +256,31 @@
       "path": "seed/photos/lp-a9cua5-42.jpg",
       "filename": "Outventure Trekker 55.jpg",
       "match": "exact-model"
+    },
+    "a9cua5:45": {
+      "path": "seed/photos/lp-a9cua5-45.jpg",
+      "filename": "Splav Gradient 35.jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:47": {
+      "path": "seed/photos/lp-a9cua5-47.jpg",
+      "filename": "Ecos Fox 30.jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:1660": {
+      "path": "seed/photos/lp-a9cua5-1660.jpg",
+      "filename": "OSPREY-TALON-22.jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:399": {
+      "path": "seed/photos/lp-a9cua5-399.jpg",
+      "filename": "Camp Raid Vest.jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:483": {
+      "path": "seed/photos/lp-a9cua5-483.jpg",
+      "filename": "RaidLight Ultra Legend 20.jpg",
+      "match": "exact-model"
     }
   }
 }
