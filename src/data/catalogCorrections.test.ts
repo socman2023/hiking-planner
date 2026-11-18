@@ -12,7 +12,7 @@ it('corrects the sourced 3 g Sula sweet to a piece, without touching unknown pac
     expect(await correctImportedFoodUnits(db)).toBe(1)
     expect((await db.packages.get(one.id))?.unitKind).toBe('piece')
     expect((await db.packages.get(one.id))?.label).toBe('1 леденец (3 г)')
-    expect((await db.packages.get(bulk.id))?.unitKind).toBeUndefined()
+    expect((await db.packages.get(bulk.id))?.unitKind).toBe('')
     expect(await correctImportedFoodUnits(db)).toBe(0)
   } finally { await db.delete() }
 })
