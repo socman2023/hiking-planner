@@ -2,7 +2,7 @@ import { db, type HikingDB } from './db'
 import type { LibraryRow } from '../domain/library'
 import { detectGearBrand } from '../domain/gearBrand'
 
-const VERSION = 'lighterpack-2026-11-18-v4-brands'
+const VERSION = 'lighterpack-2026-11-18-v5-drive'
 const SETTING = 'lighterpackSeedVersion'
 interface LPItem {
   itemId: string
@@ -40,6 +40,11 @@ export async function importLighterPackCatalog(force = false, database: HikingDB
       !Array.isArray(data.lists) || data.lists.length !== 4) {
     throw new Error('Некорректная версия каталога LighterPack')
   }
+  const imageResponse = await fetch(import.meta.env.BASE_URL + 'seed/drive-image-manifest.json')
+  if (!imageResponse.ok) throw new Error('Не удалось загрузить карту фотографий Drive')
+  const imageData: { version:number; images: Record<string,{path:string;match:string}> } =
+    await imageResponse.json()
+  if (imageData.version!==1 || typeof imageData.images!=='object') throw new Error('Некорректная карта Drive')
   for (const list of data.lists) {
     if (!['a9cua5','4pg9c9','gdl4a','0lr1s5'].includes(list.code) ||
         !Array.isArray(list.items) || list.items.length < 10) {
@@ -84,11 +89,14 @@ export async function importLighterPackCatalog(force = false, database: HikingDB
         // Only merge a differently named source item when its detailed model matches uniquely.
         const current=byKey.get(ref) ?? (description.length >= 14 && candidates.length === 1 ? candidates[0] : undefined)
         const brand = detectGearBrand(description,title)
+        const fromDrive = imageData.images[list.code + ':' + item.itemId]
+        const drivePath = typeof fromDrive?.path === 'string' && /^seed\/photos\/(?:gear-\d+|lp-[a-z0-9]+-\d+)\.jpg$/.test(fromDrive.path) ? fromDrive.path : ''
         if (current) {
           existing++
           const changes: Record<string,string|number>={}
           if (photo && !current.photoUrl) { changes.photoUrl=photo; images++ }
           if (brand && !current.brand) changes.brand=brand
+          if (drivePath && !current.photoPath) {changes.photoPath=drivePath;changes.photoMatch='exact'}
           if (productUrl && !current.productUrl) changes.productUrl=productUrl
           if (typeof item.weightG==='number' && current.listedWeightG == null) {
             changes.listedWeightG=item.weightG
@@ -105,7 +113,7 @@ export async function importLighterPackCatalog(force = false, database: HikingDB
           id:crypto.randomUUID(),createdAt:now,updatedAt:now,
           name:title,brand,model:description,category:item.category.trim().slice(0,500),
           manufacturerWeightG:null,listedWeightG:item.weightG,
-          photoUrl:photo,productUrl,sourceRef:sourceIds.get(list.code)||'',notes:''
+          photoUrl:photo,productUrl,photoPath:drivePath || '',photoMatch:drivePath ? 'exact' : null,sourceRef:sourceIds.get(list.code)||'',notes:''
         }
         await database.gear.add(row)
         byKey.set(ref,row)

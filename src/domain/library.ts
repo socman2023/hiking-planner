@@ -125,7 +125,7 @@ export function validateRow(table: LibraryTableName, input: LibraryRow): void {
     throw new Error('Недопустимый тип привязки фотографии')
   }
   if (input.photoPath !== undefined && input.photoPath !== null &&
-    (typeof input.photoPath !== 'string' || !/^seed\/photos\/gear-\d+\.jpg$/.test(input.photoPath))) {
+    (typeof input.photoPath !== 'string' || !/^seed\/photos\/(?:gear-\d+|lp-[a-z0-9]+-\d+)\.jpg$/.test(input.photoPath))) {
     throw new Error('Недопустимый путь к фотографии каталога')
   }
   if (Object.keys(input).some(key => !['id', 'createdAt', 'updatedAt', 'photoData', 'photoPath', 'photoMatch'].includes(key) && !fields.some(f => f.key === key))) {
