@@ -26,7 +26,7 @@ type Notice = { text: string; error: boolean }
 const tabInfo: Record<RootTab, string> = {
   foods: 'Продукты питания и их фасовки',
   dishes: 'Рецепты и ингредиенты из продуктового каталога',
-  gear: 'Модели снаряжения; личные экземпляры учитываются отдельно и требуют подтверждения наличия',
+  gear: 'Модели и характеристики вещей из ваших списков; количество экземпляров учитывается отдельно',
   medical: 'Лекарства, изделия и реальные упаковки',
   sources: 'Происхождение сведений и официальные ссылки',
 }
@@ -137,7 +137,9 @@ function LibraryEditor({ editing, library, onClose, onSaved }: {
         </div>
         <form onSubmit={event => void submit(event)}>
           <div className="library-form-fields">
-            {definitions[editing.table].fields.filter(spec => editing.table !== 'gear' || !['photoUrl','manufacturerWeightG'].includes(spec.key)).map(spec => {
+            {definitions[editing.table].fields.filter(spec => editing.table !== 'gear' ||
+              !['photoUrl','manufacturerWeightG','sourceDescription','sourceEntryKeys'].includes(spec.key)
+            ).map(spec => {
               // Disambiguate the polymorphic catalogItemId reference.
               const actualRows = spec.key === 'catalogItemId' && editing.table === 'medicalPacks' ?
                 { ...library, gear: library.medical } : library
@@ -324,7 +326,9 @@ export default function LibraryPage() {
               {tab === 'gear' && <div><dt>Масса, г</dt>
                 <dd>{chosen.listedWeightG ?? chosen.manufacturerWeightG ?? 'Не указано'}</dd></div>}
               {definitions[tab].fields.filter(field => field.key !== definitions[tab].title &&
-                (tab !== 'gear' || !['photoUrl','manufacturerWeightG','listedWeightG'].includes(field.key))
+                (tab !== 'gear' || (!['photoUrl','manufacturerWeightG','listedWeightG','sourceDescription','sourceEntryKeys'].includes(field.key) &&
+                  (!['lengthCm','widthCm','thicknessCm','rValue','temperatureHint','specifications'].includes(field.key) ||
+                   (chosen[field.key] !== null && chosen[field.key] !== undefined && chosen[field.key] !== ''))))
               ).map(field => {
                 const value = chosen[field.key]
                 const href = field.key === 'sourceRef'
