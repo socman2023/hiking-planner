@@ -31,6 +31,7 @@ test('резервная копия восстанавливает походы'
   const dialog = page.getByRole('dialog')
   await dialog.getByPlaceholder('Например, Карельские озёра').fill('Мой тест')
   await dialog.getByRole('button', { name: 'Создать поход' }).click()
+  await expect(page.getByRole('heading', { name: 'Мой тест' })).toBeVisible()
   await page.goto('/settings')
   const downloadPromise = page.waitForEvent('download')
   await page.getByRole('button', { name: 'Скачать JSON' }).click()
