@@ -118,7 +118,11 @@ export function validateRow(table: LibraryTableName, input: LibraryRow): void {
     !Number.isFinite(Date.parse(input.updatedAt))) throw new Error('Некорректные служебные поля записи')
   const fields = definitions[table].fields
   if (input.photoData !== undefined && input.photoData !== null) validatePhotoData(input.photoData)
-  if (Object.keys(input).some(key => !['id', 'createdAt', 'updatedAt', 'photoData'].includes(key) && !fields.some(f => f.key === key))) {
+  if (input.photoPath !== undefined && input.photoPath !== null &&
+    (typeof input.photoPath !== 'string' || !/^seed\/photos\/gear-\d+\.jpg$/.test(input.photoPath))) {
+    throw new Error('Недопустимый путь к фотографии каталога')
+  }
+  if (Object.keys(input).some(key => !['id', 'createdAt', 'updatedAt', 'photoData', 'photoPath'].includes(key) && !fields.some(f => f.key === key))) {
     throw new Error('Неизвестное поле каталога')
   }
   for (const spec of fields) {
@@ -160,6 +164,10 @@ export function validatePhotoData(value: unknown): LibraryPhoto[] {
   }
   return decoded as LibraryPhoto[]
 }
+export function getSeedPhotoPath(row: LibraryRow | null | undefined): string | null {
+  if (!row || typeof row.photoPath !== 'string' || !/^seed\/photos\/gear-\d+\.jpg$/.test(row.photoPath)) return null
+  return row.photoPath
+}
 export function getLibraryPhotos(row: LibraryRow | null | undefined): LibraryPhoto[] {
   if (!row || typeof row.photoData !== 'string') return []
   try { return validatePhotoData(row.photoData) } catch { return [] }
@@ -177,6 +185,7 @@ export function normalizeRow(table: LibraryTableName, values: Record<string, unk
     else row[spec.key] = String(v ?? '').trim() || (spec.key === 'form' ? 'unknown' : '')
   }
   if (existing?.photoData) row.photoData = existing.photoData
+  if (existing?.photoPath) row.photoPath = existing.photoPath
   validateRow(table, row)
   return row
 }

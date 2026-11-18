@@ -1,6 +1,6 @@
 import { useState, type ChangeEvent } from 'react'
 import { Camera, ImagePlus, Trash2 } from 'lucide-react'
-import { getLibraryPhotos, MAX_PHOTOS, type LibraryPhoto, type LibraryRow, type LibraryTableName } from './domain/library'
+import { getLibraryPhotos, getSeedPhotoPath, MAX_PHOTOS, type LibraryPhoto, type LibraryRow, type LibraryTableName } from './domain/library'
 import { saveLibraryPhotos } from './data/libraryRepository'
 import './library-photos.css'
 
@@ -32,17 +32,21 @@ export function LibraryPhotos({ table, row, notify }: {
   table: LibraryTableName; row: LibraryRow; notify: (text: string, error?: boolean) => void
 }) {
   const [busy, setBusy] = useState(false)
-  const photos = getLibraryPhotos(row)
+  const localPhotos = getLibraryPhotos(row)
+  const publicPath = getSeedPhotoPath(row)
+  const showPublic = localPhotos.length === 0 && !!publicPath
+  const photos: LibraryPhoto[] = showPublic && publicPath ?
+    [{ src: import.meta.env.BASE_URL + publicPath, name: 'Фото из каталога снаряжения' }] : localPhotos
   async function upload(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? [])
     event.target.value = ''
     if (!files.length) return
-    if (photos.length + files.length > MAX_PHOTOS) {
+    if (localPhotos.length + files.length > MAX_PHOTOS) {
       notify('Для карточки доступно максимум четыре фотографии', true); return
     }
     setBusy(true)
     try {
-      await saveLibraryPhotos(table, row.id, [...photos, ...await Promise.all(files.map(compress))])
+      await saveLibraryPhotos(table, row.id, [...localPhotos, ...await Promise.all(files.map(compress))])
       notify('Фотографии сохранены локально')
     } catch (e) { notify(e instanceof Error ? e.message : 'Ошибка загрузки фото', true) }
     finally { setBusy(false) }
@@ -51,7 +55,7 @@ export function LibraryPhotos({ table, row, notify }: {
     if (!window.confirm('Удалить фотографию?')) return
     setBusy(true)
     try {
-      await saveLibraryPhotos(table, row.id, photos.filter((_, i) => i !== index))
+      await saveLibraryPhotos(table, row.id, localPhotos.filter((_, i) => i !== index))
       notify('Фотография удалена')
     } catch (e) { notify(e instanceof Error ? e.message : 'Ошибка удаления фото', true) }
     finally { setBusy(false) }
@@ -59,7 +63,7 @@ export function LibraryPhotos({ table, row, notify }: {
   return <section className="library-photo-panel" aria-label="Фотографии">
     <div className="library-photo-head">
       <h3><Camera size={16}/> Фотографии · {photos.length}/{MAX_PHOTOS}</h3>
-      <label className={'button secondary library-file-button' + (busy || photos.length >= MAX_PHOTOS ? ' library-upload-disabled' : '')}>
+      <label className={'button secondary library-file-button' + (busy || localPhotos.length >= MAX_PHOTOS ? ' library-upload-disabled' : '')}>
         <ImagePlus size={16}/> Добавить фото
         <input type="file" accept="image/jpeg,image/png,image/webp" multiple
           aria-label="Выбрать фотографии" disabled={busy || photos.length >= MAX_PHOTOS}
@@ -70,10 +74,11 @@ export function LibraryPhotos({ table, row, notify }: {
       {photos.map((p, i) => <figure key={i} className="library-photo-item">
         <img loading="lazy" src={p.src} alt={'Фото: ' + p.name}/>
         <figcaption title={p.name}>{p.name}</figcaption>
-        <button type="button" className="library-photo-remove" title="Удалить"
-          aria-label={'Удалить фото ' + (i + 1)} disabled={busy} onClick={() => void remove(i)}><Trash2 size={15}/></button>
+        {!showPublic && <button type="button" className="library-photo-remove" title="Удалить"
+          aria-label={'Удалить фото ' + (i + 1)} disabled={busy} onClick={() => void remove(i)}><Trash2 size={15}/></button>}
       </figure>)}
     </div> : <div className="library-photo-empty"><Camera size={25}/><span>Фотографии пока не добавлены</span></div>}
-    <p className="library-photo-caption">JPG/PNG/WebP до 8 МБ. Фото уменьшаются до 640 px и сохраняются в этом браузере. JSON-бэкап включает фотографии.</p>
+    {showPublic && <p className="library-photo-caption">Фото из предоставленной папки Google Drive, встроено в публичную версию Hiking Planner. Свой снимок можно добавить вместо него.</p>}
+    <p className="library-photo-caption">JPG/PNG/WebP до 8 МБ. Пользовательские фото уменьшаются до 640 px и хранятся в браузере; JSON-бэкап включает их.</p>
   </section>
 }
