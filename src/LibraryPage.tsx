@@ -6,13 +6,15 @@ import {
 } from 'lucide-react'
 import {
   childByRoot, definitions, parentKey, rootTabs,
-  type FieldSpec, type LibraryRow, type LibraryTableName, type RootTab,
+  getLibraryPhotos, type FieldSpec, type LibraryRow, type LibraryTableName, type RootTab,
 } from './domain/library'
 import {
   deleteLibraryRow, exportLibraryCsv, makeLibraryArchive, parseLibraryArchive,
   readLibrary, replaceLibrary, saveJsonFile, saveLibraryRow, type LibraryArchive, type LibraryData,
 } from './data/libraryRepository'
 import './library.css'
+import { LibraryPhotos } from './LibraryPhotos'
+import { importXlsxCatalog } from './data/importXlsxSeed'
 
 type Editor = { table: LibraryTableName; row?: LibraryRow; preset?: Record<string, string> }
 type Notice = { text: string; error: boolean }
@@ -152,13 +154,37 @@ export default function LibraryPage() {
   const [notice, setNotice] = useState<Notice | null>(null)
   const [pending, setPending] = useState<LibraryArchive | null>(null)
   const [busy, setBusy] = useState(false)
+  const [seedBusy, setSeedBusy] = useState(false)
+  const [seedStatus, setSeedStatus] = useState('')
+  useEffect(() => {
+    let mounted = true
+    setSeedBusy(true)
+    void importXlsxCatalog().then(result => {
+      if (!mounted) return
+      setSeedStatus(result.alreadyImported ? 'Исходные записи уже добавлены' :
+        'Загружено из двух Excel: ' + result.added + ' новых записей')
+    }).catch(error => {
+      if (mounted) setSeedStatus('Импорт исходных записей не удался: ' +
+        (error instanceof Error ? error.message : 'неизвестная ошибка'))
+    }).finally(() => { if (mounted) setSeedBusy(false) })
+    return () => { mounted = false }
+  }, [])
+  async function repeatSeedImport() {
+    try {
+      setSeedBusy(true)
+      const result = await importXlsxCatalog(true)
+      setSeedStatus('Сверка завершена: добавлено ' + result.added +
+        ', уже было ' + result.existing + '. Существующие записи не заменены.')
+    } catch(error) { setSeedStatus(error instanceof Error ? error.message : 'Ошибка импорта') }
+    finally { setSeedBusy(false) }
+  }
   useEffect(() => { setQuery(''); setCategory(''); setSelected(null); setPending(null) }, [tab])
   const all = library ?? null
   const items = all?.[tab] ?? []
   const categories = useMemo(() => [...new Set(items.map(x => String(x.category ?? '')).filter(Boolean))].sort(), [items])
   const visible = useMemo(() => items
     .filter(row => !category || row.category === category)
-    .filter(row => Object.values(row).some(value => String(value ?? '').toLocaleLowerCase('ru').includes(query.trim().toLocaleLowerCase('ru'))))
+    .filter(row => Object.entries(row).filter(([key]) => key !== 'photoData').some(([, value]) => String(value ?? '').toLocaleLowerCase('ru').includes(query.trim().toLocaleLowerCase('ru'))))
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)), [items, query, category])
   const chosen = items.find(row => row.id === selected) ?? null
   const childTable = childByRoot[tab]
@@ -194,7 +220,7 @@ export default function LibraryPage() {
     event.target.value = ''
     if (!file) return
     try {
-      if (file.size > 10 * 1024 * 1024) throw new Error('Файл больше 10 МБ')
+      if (file.size > 45 * 1024 * 1024) throw new Error('Файл больше 45 МБ')
       const archive = parseLibraryArchive(await file.text())
       setPending(archive)
       announce('Архив проверен. Посмотрите состав перед заменой.')
@@ -222,6 +248,14 @@ export default function LibraryPage() {
         <div className="heading-actions"><button type="button" className="button primary" onClick={() => setEditing({ table: tab })}><Plus size={18}/> Добавить {definitions[tab].singular}</button></div>
       </div>
 
+      <section className="library-seed-banner" aria-label="Исходные данные из Excel">
+        <div><strong>Каталоги из «Крым — 4 дня» и «Архыз — 4 дня»</strong>
+          <p>43 продукта, 43 фасовки, 113 позиций снаряжения, 27 медицинских карточек, 54 исторические записи аптечки и 9 источников. Данные добавляются без замены имеющихся записей.</p>
+          <small role="status">{seedBusy ? 'Проверяем встроенный каталог…' : seedStatus || 'Подготовка каталога…'}</small></div>
+        <button type="button" className="button secondary" onClick={() => void repeatSeedImport()} disabled={seedBusy}>
+          <ArchiveRestore size={17}/> Сверить и добавить недостающее
+        </button>
+      </section>
       <div className="library-tabs" role="tablist" aria-label="Разделы библиотеки">
         {rootTabs.map(name => <button type="button" role="tab" aria-selected={tab === name}
           className={tab === name ? 'selected' : ''} key={name} onClick={() => setTab(name)}>
@@ -243,7 +277,9 @@ export default function LibraryPage() {
         <section className="library-list" aria-label="Список записей">
           {visible.length ? visible.map(item => <button type="button" key={item.id}
             className={'library-entry' + (selected === item.id ? ' selected' : '')} onClick={() => setSelected(item.id)}>
-            <span className="library-entry-icon">{tab === 'medical' ? '✚' : tab === 'foods' ? '◈' : tab === 'dishes' ? '◉' : tab === 'gear' ? '△' : '↗'}</span>
+            <span className={'library-entry-icon' + (getLibraryPhotos(item).length ? ' photo-thumb' : '')}>
+              {getLibraryPhotos(item)[0] ? <img src={getLibraryPhotos(item)[0].src} alt="" loading="lazy" /> :
+                tab === 'medical' ? '✚' : tab === 'foods' ? '◈' : tab === 'dishes' ? '◉' : tab === 'gear' ? '△' : '↗'}</span>
             <span className="library-entry-body"><strong>{titleOf(tab, item)}</strong>
               <small>{String(item.category || item.brand || item.provider || item.internationalName || '') || 'Без категории'}</small></span>
             <span className="library-entry-end">{item.sourceRef ? 'Источник ✓' : 'Личная запись'}</span>
@@ -259,6 +295,7 @@ export default function LibraryPage() {
                 <button className="icon-button" aria-label="Редактировать запись" title="Редактировать" onClick={() => setEditing({ table: tab, row: chosen })}><Pencil size={18}/></button>
                 <button className="icon-button library-delete" aria-label="Удалить запись" title="Удалить" onClick={() => void remove(tab, chosen.id)}><Trash2 size={18}/></button>
               </div></div>
+            <LibraryPhotos key={chosen.id} table={tab} row={chosen} notify={announce}/>
             <dl className="library-attributes">
               {definitions[tab].fields.filter(field => field.key !== definitions[tab].title).map(field =>
                 <div key={field.key}><dt>{field.label}</dt><dd>{showValue(field, chosen[field.key], all)}</dd></div>)}

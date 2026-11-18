@@ -6,7 +6,7 @@ import {
 import { validateLibraryData } from './libraryRepository'
 
 const SEED_KEY = 'xlsxSeedVersion'
-const SEED_VERSION = '2026-11-18-clean-v1'
+const SEED_VERSION = 'xlsx-2026-11-18-v1'
 export interface SeedResult { added: number; existing: number; alreadyImported: boolean }
 const order: LibraryTableName[] = [
   'sources', 'foods', 'gear', 'medical', 'dishes', 'packages',
