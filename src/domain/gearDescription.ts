@@ -32,22 +32,25 @@ export function parseGearDescription(description: unknown, name: unknown = ''): 
   const heading = parts.shift() ?? ''
   const brand = detectGearBrand(source, name)
   const prefix = leadingBrand(heading, brand)
-  const model = prefix ? heading.slice(prefix.length).replace(/^[\s,:–—-]+/, '').trim() : heading
+  const modelCandidate = prefix ? heading.slice(prefix.length).replace(/^[\s,:–—-]+/, '').trim() : heading
+  // A brand by itself is not a model; dimension-only headings describe a size, not a product.
+  const dimensionOnlyHeading = /^\d+(?:[.,]\d+)?\s*[*×xх]\s*\d+(?:[.,]\d+)?(?:\s*[*×xх]\s*\d+(?:[.,]\d+)?)?\s*(?:см|cm|мм|mm|м|m)$/i.test(heading)
   const result: ParsedGearDescription = {
-    brand, model: model || heading,
+    brand, model: dimensionOnlyHeading ? '' : modelCandidate,
     lengthCm: null, widthCm: null, thicknessCm: null,
     rValue: null, temperatureHint: '', specifications: '',
   }
   const rest: string[] = []
-  for (const part of parts) {
-    const dimensions = part.match(/^(\d+(?:[.,]\d+)?)\s*[*×xх]\s*(\d+(?:[.,]\d+)?)\s*[*×xх]\s*(\d+(?:[.,]\d+)?)\s*(см|cm)$/i)
+  for (const part of dimensionOnlyHeading ? [heading, ...parts] : parts) {
+    const dimensions = part.match(/^(\d+(?:[.,]\d+)?)\s*[*×xх]\s*(\d+(?:[.,]\d+)?)(?:\s*[*×xх]\s*(\d+(?:[.,]\d+)?))?\s*(см|cm|мм|mm|м|m)$/i)
     if (dimensions) {
-      result.lengthCm = numeric(dimensions[1])
-      result.widthCm = numeric(dimensions[2])
-      result.thicknessCm = numeric(dimensions[3])
+      const scale = /^(?:мм|mm)$/i.test(dimensions[4]) ? 0.1 : /^(?:м|m)$/i.test(dimensions[4]) ? 100 : 1
+      result.lengthCm = numeric(dimensions[1]) * scale
+      result.widthCm = numeric(dimensions[2]) * scale
+      if (dimensions[3]) result.thicknessCm = numeric(dimensions[3]) * scale
       continue
     }
-    const r = part.match(/^R[\s-]*Value\s*[:=]?\s*(\d+(?:[.,]\d+)?)$/i)
+    const r = part.match(/^R[\s-]*Value\s*[-:=]?\s*(\d+(?:[.,]\d+)?)$/i)
     if (r) { result.rValue = numeric(r[1]); continue }
     if (/^до\s*[+-]?\d+(?:[.,]\d+)?\s*(?:°\s?[cс])?$/i.test(part)) {
       result.temperatureHint = part

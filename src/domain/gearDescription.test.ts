@@ -17,6 +17,29 @@ describe('separating brand, model and gear specifications', () => {
       brand: 'Nordway', model: 'Trekker 75', specifications: 'серо-синий',
     })
   })
+  it('does not repeat a known brand in the model when no model is supplied', () => {
+    expect(parseGearDescription('Splav, титан', 'Кружка')).toMatchObject({
+      brand: 'Splav', model: '', specifications: 'титан',
+    })
+    expect(parseGearDescription('Nordway', 'Сидушка складная')).toMatchObject({
+      brand: 'Nordway', model: '',
+    })
+  })
+  it('extracts two-axis dimensions even when dimensions are the entire heading', () => {
+    expect(parseGearDescription('210*150 см, китайский', 'Футпринт')).toMatchObject({
+      brand: '', model: '', lengthCm: 210, widthCm: 150,
+      thicknessCm: null, specifications: 'китайский',
+    })
+    expect(parseGearDescription('RedFox, 3*3 м', 'Тент')).toMatchObject({
+      brand: 'Red Fox', model: '', lengthCm: 300, widthCm: 300,
+    })
+  })
+  it('parses R-Value separated by a dash and comma decimal', () => {
+    expect(parseGearDescription('Klymit Static V Luxe, 193*76*7,6 см, R-Value - 1,3, до +8', 'Коврик надувной')).toMatchObject({
+      brand: 'Klymit', model: 'Static V Luxe', lengthCm: 193, widthCm: 76,
+      thicknessCm: 7.6, rValue: 1.3, temperatureHint: 'до +8',
+    })
+  })
   it('never invents a brand or drops a suffix when it cannot identify one', () => {
     const parsed = parseGearDescription('Модель без марки, особый вариант', 'Укрытие')
     expect(parsed).toMatchObject({

@@ -3,7 +3,7 @@ import type { LibraryRow } from '../domain/library'
 import { parseGearDescription } from '../domain/gearDescription'
 
 const SETTING = 'lighterpackSeedVersion'
-const VERSION = 'lighterpack-v7-all-rows-owned-v1'
+const VERSION = 'lighterpack-v8-semantic-models-v1'
 interface LPItem {
   itemId: string; name: string; description: string; category: string
   weightG: number | null; quantity?: number; photoUrl: string; productUrl: string
@@ -98,7 +98,10 @@ export async function importLighterPackCatalog(force = false, database: HikingDB
         linked=current;existing++
         const changes: Record<string,string|number|null>={}
         if (!current.brand && parsed.brand) changes.brand=parsed.brand
-        if (norm(current.model) === norm(description) && parsed.model) changes.model=parsed.model
+        const sourceHeading = description.split(/,\s+/)[0]?.trim() ?? ''
+        const generatedModel = norm(current.model) === norm(description) ||
+          (parsed.model === '' && norm(current.model) === norm(sourceHeading))
+        if (generatedModel && norm(current.model) !== norm(parsed.model)) changes.model=parsed.model
         if (!current.sourceDescription && description) changes.sourceDescription=description
         for (const field of ['lengthCm','widthCm','thicknessCm','rValue'] as const)
           if (current[field] == null && parsed[field] !== null) changes[field]=parsed[field]
