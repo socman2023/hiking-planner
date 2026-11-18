@@ -118,11 +118,15 @@ export function validateRow(table: LibraryTableName, input: LibraryRow): void {
     !Number.isFinite(Date.parse(input.updatedAt))) throw new Error('Некорректные служебные поля записи')
   const fields = definitions[table].fields
   if (input.photoData !== undefined && input.photoData !== null) validatePhotoData(input.photoData)
+  if (input.photoMatch !== undefined && input.photoMatch !== null &&
+      input.photoMatch !== 'exact' && input.photoMatch !== 'illustrative') {
+    throw new Error('Недопустимый тип привязки фотографии')
+  }
   if (input.photoPath !== undefined && input.photoPath !== null &&
     (typeof input.photoPath !== 'string' || !/^seed\/photos\/gear-\d+\.jpg$/.test(input.photoPath))) {
     throw new Error('Недопустимый путь к фотографии каталога')
   }
-  if (Object.keys(input).some(key => !['id', 'createdAt', 'updatedAt', 'photoData', 'photoPath'].includes(key) && !fields.some(f => f.key === key))) {
+  if (Object.keys(input).some(key => !['id', 'createdAt', 'updatedAt', 'photoData', 'photoPath', 'photoMatch'].includes(key) && !fields.some(f => f.key === key))) {
     throw new Error('Неизвестное поле каталога')
   }
   for (const spec of fields) {
@@ -186,6 +190,7 @@ export function normalizeRow(table: LibraryTableName, values: Record<string, unk
   }
   if (existing?.photoData) row.photoData = existing.photoData
   if (existing?.photoPath) row.photoPath = existing.photoPath
+  if (existing?.photoMatch) row.photoMatch = existing.photoMatch
   validateRow(table, row)
   return row
 }

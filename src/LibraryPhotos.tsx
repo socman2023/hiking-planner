@@ -35,8 +35,9 @@ export function LibraryPhotos({ table, row, notify }: {
   const localPhotos = getLibraryPhotos(row)
   const publicPath = getSeedPhotoPath(row)
   const showPublic = localPhotos.length === 0 && !!publicPath
+  const illustrative = row.photoMatch === 'illustrative'
   const photos: LibraryPhoto[] = showPublic && publicPath ?
-    [{ src: import.meta.env.BASE_URL + publicPath, name: 'Фото из каталога снаряжения' }] : localPhotos
+    [{ src: import.meta.env.BASE_URL + publicPath, name: illustrative ? 'Иллюстрация типа снаряжения' : 'Фото из каталога снаряжения' }] : localPhotos
   async function upload(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? [])
     event.target.value = ''
@@ -78,7 +79,7 @@ export function LibraryPhotos({ table, row, notify }: {
           aria-label={'Удалить фото ' + (i + 1)} disabled={busy} onClick={() => void remove(i)}><Trash2 size={15}/></button>}
       </figure>)}
     </div> : <div className="library-photo-empty"><Camera size={25}/><span>Фотографии пока не добавлены</span></div>}
-    {showPublic && <p className="library-photo-caption">Фото из предоставленной папки Google Drive, встроено в публичную версию Hiking Planner. Свой снимок можно добавить вместо него.</p>}
+    {showPublic && <p className="library-photo-caption">{illustrative ? 'Типовое фото: точная модель по подписи файла не подтверждена.' : 'Фото из предоставленной папки Google Drive.'} Свой снимок можно добавить вместо него.</p>}
     <p className="library-photo-caption">JPG/PNG/WebP до 8 МБ. Пользовательские фото уменьшаются до 640 px и хранятся в браузере; JSON-бэкап включает их.</p>
   </section>
 }

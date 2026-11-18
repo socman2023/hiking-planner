@@ -28,7 +28,7 @@ export function stripAutoNotes(original: string): string {
   return before.replace(/^Цена: [^\n]*$/, '').trim()
 }
 
-const CLEAN_KEY = 'libraryGeneratedNotesCleanupV1'
+const CLEAN_KEY = 'libraryGeneratedNotesCleanupV2'
 const TABLES: LibraryTableName[] = ['foods', 'packages', 'dishes', 'ingredients', 'gear', 'ownedGear', 'medical', 'medicalPacks', 'sources']
 export async function cleanImportedLibraryNotes(database: HikingDB = db): Promise<number> {
   return database.transaction('rw', [database.settings, ...TABLES.map(name => database[name])], async () => {

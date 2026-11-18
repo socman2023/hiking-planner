@@ -3,6 +3,24 @@
   "selection": "exact model or identifiable gear name",
   "createdAt": "2026-11-18",
   "matched": {
+    "0": {
+      "file_id": "19XO2m-TG5Sa11EqLKVoCoIUwYhWk4wmO",
+      "name": "Osprey Exos 48_2022.jpg",
+      "size": 228397,
+      "match": "exact"
+    },
+    "1": {
+      "file_id": "1dGqMHuUFnCn2Ac7wYOleAkNKQtLaw5Iv",
+      "name": "Splav karman liamka.jpg",
+      "size": 7360,
+      "match": "exact"
+    },
+    "2": {
+      "file_id": "1MjlVnriK61raJwiWi3kk3-hRsw5yX41e",
+      "name": "Ultralight High Vis Raincover M.jpg",
+      "size": 192211,
+      "match": "illustrative"
+    },
     "3": {
       "file_id": "15Wc5JYfoRQyxesGws8QvyRzEz05rMXej",
       "name": "Splav Cowl.jpg",
@@ -12,6 +30,12 @@
       "file_id": "1fO3i4JZmAQvX85jVXvkg_D_hhKbVh1IB",
       "name": "Sivera Вежа +3.jpg",
       "size": 29785
+    },
+    "5": {
+      "file_id": "15Cnx1gL6oGZPvqMlNL_EBT5kdZaMbh7U",
+      "name": "Therm-A-Rest NeoAir XLite.jpg",
+      "size": 23932,
+      "match": "illustrative"
     },
     "6": {
       "file_id": "1477GVIUVS90cOPyJLQmdBm2rC6PgeWgg",
@@ -28,10 +52,52 @@
       "name": "termoodeyalo.jpg",
       "size": 18889
     },
+    "9": {
+      "file_id": "1pujL6GKgp3Lkg9eYPEnS_B1TIDr3dqom",
+      "name": "SeaToSummit Ultra-Sil Nano.jpg",
+      "size": 16158,
+      "match": "exact"
+    },
+    "10": {
+      "file_id": "1d3QArlDMrJUDU6hLw-fN5VNyY9CiQunU",
+      "name": "chehol dyneema.jpg",
+      "size": 43393,
+      "match": "illustrative"
+    },
+    "11": {
+      "file_id": "1eOFyrkf5au3lpgXNH4HuXqJnWYktVjDw",
+      "name": "Titanium-Tent-Pegs-2.jpg",
+      "size": 28354,
+      "match": "illustrative"
+    },
+    "12": {
+      "file_id": "1mBdx3baRgx-sp2oVzpXMLb5vgg_0NEaP",
+      "name": "репшнур 2 мм синий.jpg",
+      "size": 9951,
+      "match": "illustrative"
+    },
     "13": {
       "file_id": "1r4Us253595Cm4vkaEarz1S0YtEesRSvy",
       "name": "Camp Sky Carbon.jpg",
       "size": 21556
+    },
+    "14": {
+      "file_id": "1CU7ZtLVD2oP7XucURTBxlHp23ViPXmAW",
+      "name": "Multibandana Crow Military.jpg",
+      "size": 26141,
+      "match": "illustrative"
+    },
+    "15": {
+      "file_id": "19LJrqlz0aeipiFYhgAVSu9jBSnhZkN2l",
+      "name": "Buff MW Merino Wool.jpg",
+      "size": 235673,
+      "match": "exact"
+    },
+    "16": {
+      "file_id": "13JA7tIGEIpKyE5OTW3QgSrs7levZtJ3N",
+      "name": "Splav Minima 3L.jpg",
+      "size": 188110,
+      "match": "exact"
     },
     "17": {
       "file_id": "1Y23IHTjcTg5vKvxaIlCTKGYHwFu8lPes",
@@ -43,10 +109,28 @@
       "name": "Sivera Берковец Quark.jpg",
       "size": 52069
     },
+    "19": {
+      "file_id": "1vOy8Bdt427dKYJbSQvae4ENDJd32vD9Z",
+      "name": "sivera_gamayun_pro_chernaya.jpg",
+      "size": 41587,
+      "match": "exact"
+    },
+    "20": {
+      "file_id": "10eGPMbZVA75O9KbZcKG4IBPGB1bHHHiz",
+      "name": "Sivera Аер.jpg",
+      "size": 219159,
+      "match": "exact"
+    },
     "21": {
       "file_id": "1q-c_HVoFqJcoTWO41yk8xr2xcSmy7W_n",
       "name": "Solognac SG900.jpg",
       "size": 18918
+    },
+    "22": {
+      "file_id": "1B_IzFGaGipZM-W00xWL4vfxzQgJhzUr-",
+      "name": "Sivera Лайда Про.jpg",
+      "size": 216767,
+      "match": "exact"
     },
     "23": {
       "file_id": "1YsXBWm7VdDNWDdgEms_-KpcQq7ND4B1X",
@@ -58,15 +142,39 @@
       "name": "Sivera Годобль niz.jpg",
       "size": 19422
     },
+    "25": {
+      "file_id": "1rqTB0Lcm-vGwBbDheylyR-dbKCpNOQoB",
+      "name": "Fjallraven Vidda Pro Dark Grey.jpg",
+      "size": 184973,
+      "match": "exact"
+    },
     "26": {
       "file_id": "1NOB0tdopObOZM90eurGQDUkfvFIXy72I",
       "name": "Arcteryx Conveyor.jpg",
       "size": 46299
     },
+    "27": {
+      "file_id": "1FW2wR3sCzzM5XZCImvO-Jnp77PpcfyQs",
+      "name": "Splav Fresh.jpg",
+      "size": 49039,
+      "match": "exact"
+    },
     "28": {
       "file_id": "1LOmSKormOkQt-7vhztEoaDt0cdXgJJdD",
       "name": "Silver Pinquin.jpg",
       "size": 341564
+    },
+    "29": {
+      "file_id": "1xdO5LlnHqklYFJ7_QfaFIg-_19bHck-3",
+      "name": "Inov8 ROCLITE G 345 GTX.jpg",
+      "size": 54232,
+      "match": "exact"
+    },
+    "30": {
+      "file_id": "1z1iY4aEL6sP9SNqPi6i88P6JVSSDs6qH",
+      "name": "Naturehike DuckDown Camp Boots.jpg",
+      "size": 47264,
+      "match": "exact"
     },
     "31": {
       "file_id": "1TZm7N5Tnoa1XNdf-JObYGNFxFHcWZK15",
@@ -98,10 +206,28 @@
       "name": "SeaToSummit X-Mug blue.jpg",
       "size": 41658
     },
+    "37": {
+      "file_id": "1Cn-e8jbzLaTq0gHrYM9mICjhB6MnoN7_",
+      "name": "APG Outdoor 1,4L.jpg",
+      "size": 388749,
+      "match": "exact"
+    },
+    "38": {
+      "file_id": "1F7_IHQd3ZDSXHHbx9wcx80xT95zOzt0f",
+      "name": "Lixada thermospalnik.jpg",
+      "size": 41322,
+      "match": "illustrative"
+    },
     "39": {
       "file_id": "1zz9GBfMSx9dYjwKnsQd0NYTTebJW8tJ2",
       "name": "MSR 227.jpg",
       "size": 26515
+    },
+    "40": {
+      "file_id": "1DMXAiH9KRuV0m_qmCejbOC5TxpJ_v-co",
+      "name": "Platypus Dirty 1L.jpg",
+      "size": 103475,
+      "match": "exact"
     },
     "41": {
       "file_id": "1GwelaBg8tmcBJTpf3r28LF3nrQHPKoMi",
@@ -113,6 +239,42 @@
       "name": "Platypus Quickdraw Microfilter+Reservoir system.jpg",
       "size": 275949
     },
+    "43": {
+      "file_id": "1_Y7aKjRtlQRvJqlHvt3kJnUlajnF-D4Y",
+      "name": "Zazhigalka Rene RN-09.jpg",
+      "size": 8151,
+      "match": "exact"
+    },
+    "44": {
+      "file_id": "13Fx49zTHXPpdZjyM2Sr3bq-vlMgYmSk3",
+      "name": "набор для разведения огня.jpg",
+      "size": 816317,
+      "match": "illustrative"
+    },
+    "45": {
+      "file_id": "1VxqhRe-JNL8Rc1jPFXyIGioNA3sqkt8C",
+      "name": "Procamptek Ultimate Fire Tinder.jpg",
+      "size": 106567,
+      "match": "exact"
+    },
+    "46": {
+      "file_id": "1oVlmDL9xZLiVYc07dtu-Cn02cXr5H51R",
+      "name": "HomeStory_salfetki_microfiber_1.jpg",
+      "size": 30090,
+      "match": "exact"
+    },
+    "47": {
+      "file_id": "1L_VFU1xmxqqMZGGMuRTmDyaseaQgHjn8",
+      "name": "Nitecore-NU25.jpg",
+      "size": 99838,
+      "match": "illustrative"
+    },
+    "48": {
+      "file_id": "1sjSJCX41cpk_vNdmf4x9gP0IfJQ2F_7p",
+      "name": "Ganzo Firebird F753M1-BK.jpg",
+      "size": 47315,
+      "match": "exact"
+    },
     "49": {
       "file_id": "1XuznD69YlmeljyjY2g013cCHhCY1siWD",
       "name": "Victorinox Classic.jpg",
@@ -123,10 +285,52 @@
       "name": "Gear Aid.jpg",
       "size": 33865
     },
+    "52": {
+      "file_id": "1OlVNwVrU8jdl-2nzr2itmxO0dGGKnfbz",
+      "name": "sgs22u.jpg",
+      "size": 1010538,
+      "match": "exact"
+    },
+    "53": {
+      "file_id": "1INm-tS1qlb1BU3NlP5idEvHnWYVy0HiC",
+      "name": "fenix7x_.jpg",
+      "size": 54644,
+      "match": "exact"
+    },
     "54": {
       "file_id": "1pYmDnZjqhkk_zlbLm8s-wqWTX-O-gYLj",
       "name": "Samsung 15W.jpg",
       "size": 7609
+    },
+    "55": {
+      "file_id": "1WdisamYionhS8BdotaRBqouxlPD3jIpy",
+      "name": "Nitecore NB20000 carbo.jpg",
+      "size": 58416,
+      "match": "exact"
+    },
+    "56": {
+      "file_id": "1nCr6WoPxrS4nfDEdcerMHAi2unvLTHte",
+      "name": "Nitecore NPB1.jpg",
+      "size": 48968,
+      "match": "exact"
+    },
+    "57": {
+      "file_id": "1RxukfnBae5oIqgTLVo8M6Qv-O7ieN5Zb",
+      "name": "Samsung type-C 1m.jpg",
+      "size": 12330,
+      "match": "exact"
+    },
+    "58": {
+      "file_id": "1QWCxmXOqEXRtW6gwrE6jTlQ7PUgEeLVK",
+      "name": "Garmin cable.jpg",
+      "size": 12397,
+      "match": "illustrative"
+    },
+    "59": {
+      "file_id": "1ihklkA__A0h0-_kcBgjXiLPcYz03PH6K",
+      "name": "Samsung microUSB-USB-C.jpg",
+      "size": 2756,
+      "match": "exact"
     },
     "60": {
       "file_id": "1UG6ZzVWm9Fq-EoZVFV-T74G0rLQFJS73",
@@ -138,10 +342,22 @@
       "name": "AKG.jpg",
       "size": 14187
     },
+    "62": {
+      "file_id": "1ezOSzoOVIaGTN_CBBVD5F6vS7oiIyjFi",
+      "name": "Salfetki Premial Beauty-15.jpg",
+      "size": 57326,
+      "match": "exact"
+    },
     "63": {
       "file_id": "1dhLDChnl13E4iPhIV3FwbLi8hMYkLTmV",
       "name": "salfetki bumazhnye ToChtoNado 10.jpg",
       "size": 29302
+    },
+    "64": {
+      "file_id": "1xySpwq9Usx2nFpVEArKLqah7LnSfVULr",
+      "name": "Magnit toilet.jpg",
+      "size": 52104,
+      "match": "exact"
     },
     "65": {
       "file_id": "16dZ3IQTG6HBti8xsD7M-H2mWUCJAR3o8",
@@ -153,15 +369,63 @@
       "name": "Splav Mini.jpg",
       "size": 41981
     },
+    "68": {
+      "file_id": "164WktN3hOSdnKQlbqqMsd6CNW8xFlIwq",
+      "name": "Sea-to-Summit Cable Cell S.jpg",
+      "size": 91934,
+      "match": "exact"
+    },
+    "69": {
+      "file_id": "1P1gj08GiACfGYC1AwNo9opuENr2H9bN7",
+      "name": "Ochki.jpg",
+      "size": 11648,
+      "match": "illustrative"
+    },
     "70": {
       "file_id": "1sx5YNL11xEB-7NRcaz8ivTCd3_7xf-po",
       "name": "Orao.jpg",
       "size": 20180
     },
+    "71": {
+      "file_id": "1dD1FjvAEpxZ8Hu5vX-TcQaH2XVtKtCEd",
+      "name": "Adventure Medical Mountain Series Medical Kit (Day Tripper Lite).jpg",
+      "size": 255812,
+      "match": "exact"
+    },
     "72": {
       "file_id": "17ZEjDKvr2clbyAwZ-2iCBuX9FqWcx5pZ",
       "name": "Splav Readily 6l.jpg",
       "size": 25947
+    },
+    "73": {
+      "file_id": "11qBYV1TaqrT6TiYGVYhRhj6IZWDjCZ2O",
+      "name": "3F UL Gear M.jpg",
+      "size": 8066,
+      "match": "illustrative"
+    },
+    "74": {
+      "file_id": "1yq42DSoJGoRCw3L6aWRWXjc1bZcdpzBs",
+      "name": "3F UL Gear L.jpg",
+      "size": 10986,
+      "match": "illustrative"
+    },
+    "75": {
+      "file_id": "1jvkQIyKJQyleyqyTTvYhexlu_BnZnH_3",
+      "name": "Quechua M.jpg",
+      "size": 69956,
+      "match": "illustrative"
+    },
+    "76": {
+      "file_id": "1Z5s2IEttB-oLboTOmp1Xv4OMd0m3x3nr",
+      "name": "Quechua S.jpg",
+      "size": 69956,
+      "match": "illustrative"
+    },
+    "77": {
+      "file_id": "1FY6bySgOdHCXZ1chsKtmmZFcXhM6v2Ks",
+      "name": "Quechua L.jpg",
+      "size": 69956,
+      "match": "illustrative"
     },
     "79": {
       "file_id": "105b8p1u3Gal3ZWX3NiCuu0xMcozhAkOV",
@@ -172,6 +436,12 @@
       "file_id": "1yE38wWq6zJbpmYts8eIShI7CgbE2wHC_",
       "name": "Yeti Passion One.jpg",
       "size": 27734
+    },
+    "81": {
+      "file_id": "1muZaKIBThu25Gvl5gVS9ixQkSPGxmdcB",
+      "name": "Sivera Веньча.jpg",
+      "size": 153642,
+      "match": "exact"
     },
     "82": {
       "file_id": "1CoIm8UqcMRSUST2HQFmqF0JoeUZlq4Uk",
@@ -193,10 +463,46 @@
       "name": "Splav 4 mm s serebryankoy.jpg",
       "size": 9252
     },
+    "86": {
+      "file_id": "1z_4aMcLT2nOS_ASzVJrjJzKyt9oLmrFI",
+      "name": "thermarest trekker chair kit.jpg",
+      "size": 30376,
+      "match": "exact"
+    },
+    "87": {
+      "file_id": "1VKJJ-L9MpVIcdUk1vBo02_LFBLV1t2SO",
+      "name": "buff Had Aquarium.jpg",
+      "size": 36431,
+      "match": "illustrative"
+    },
+    "88": {
+      "file_id": "1CPrkhiUhKfhqxJY7CGY_dXt7J-KbGWzl",
+      "name": "Buff Coolnet UV+ Zankor Blue.jpg",
+      "size": 1525332,
+      "match": "exact"
+    },
+    "89": {
+      "file_id": "1bKRepWmA-_7budzLHaQiLUuf42NXXMjH",
+      "name": "Sivera Хант.jpg",
+      "size": 213423,
+      "match": "exact"
+    },
+    "90": {
+      "file_id": "1OCKYQErroMEaaKxn81f10ELtidlR1wqi",
+      "name": "Sivera Gvor 22.jpg",
+      "size": 51278,
+      "match": "exact"
+    },
     "91": {
       "file_id": "1rrai2CGzXhQJwVpbBm_meHkcHMREcV63",
       "name": "Sivera Бехтерец Про.jpg",
       "size": 51130
+    },
+    "92": {
+      "file_id": "1hC17hLTMOXzdOgnTeYoRSZ1KY_WK5CCy",
+      "name": "Olaian 500.jpg",
+      "size": 47342,
+      "match": "exact"
     },
     "93": {
       "file_id": "1Zf53h2uCOj1FDo_B0T-TRlQC9puSlk5m",
@@ -252,6 +558,61 @@
       "file_id": "12EBsRP0El35dyajUyLb7-tVvBZzwDSHL",
       "name": "Osprey Hydraulics Soft-Flask.jpg",
       "size": 13124
+    },
+    "104": {
+      "file_id": "1TvvgmUDUZ3jgabg2ZmF8P1wjg54T11gj",
+      "name": "Ganzo G738-BK.jpg",
+      "size": 72289,
+      "match": "exact"
+    },
+    "105": {
+      "file_id": "1HGPCR1Tgq6uQ4RhrGt2m2-E5NQMdV9mi",
+      "name": "baseus.jpg",
+      "size": 78848,
+      "match": "illustrative"
+    },
+    "106": {
+      "file_id": "1WhkVfueZqre9BRfqCKNGVumrNwLRHE_M",
+      "name": "Sony WI-XB400.jpg",
+      "size": 64715,
+      "match": "exact"
+    },
+    "107": {
+      "file_id": "1QYnd0wGjZOxB-PAGABCvH3ztRY_hQvkB",
+      "name": "Splav M2.jpg",
+      "size": 342613,
+      "match": "exact"
+    },
+    "109": {
+      "file_id": "11qBYV1TaqrT6TiYGVYhRhj6IZWDjCZ2O",
+      "name": "3F UL Gear M.jpg",
+      "size": 8066,
+      "match": "illustrative"
+    },
+    "110": {
+      "file_id": "1yq42DSoJGoRCw3L6aWRWXjc1bZcdpzBs",
+      "name": "3F UL Gear L.jpg",
+      "size": 10986,
+      "match": "illustrative"
+    },
+    "111": {
+      "file_id": "1Z5s2IEttB-oLboTOmp1Xv4OMd0m3x3nr",
+      "name": "Quechua S.jpg",
+      "size": 69956,
+      "match": "illustrative"
+    },
+    "112": {
+      "file_id": "1FY6bySgOdHCXZ1chsKtmmZFcXhM6v2Ks",
+      "name": "Quechua L.jpg",
+      "size": 69956,
+      "match": "illustrative"
     }
-  }
+  },
+  "remainingWithoutPhoto": [
+    51,
+    66,
+    78,
+    108
+  ],
+  "updatedAt": "2026-11-18"
 }
