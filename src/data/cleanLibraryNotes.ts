@@ -44,7 +44,6 @@ export async function cleanImportedLibraryNotes(database: HikingDB = db): Promis
         if (table === 'ownedGear' && typeof row.nickname === 'string' &&
             / — (?:Архыз|Крым) 4 дня$/.test(row.nickname)) {
           if (!row.ownershipStatus) changes.ownershipStatus = 'unverified'
-          if (row.ownershipStatus !== 'confirmed' && row.measuredWeightG != null) changes.measuredWeightG = null
         }
         if (Object.keys(changes).length) {
           changes.updatedAt = new Date().toISOString()
