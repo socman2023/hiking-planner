@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react'
 import { BrowserRouter, Link, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import {
-  Activity, Archive, ArrowLeft, ArrowRight, Backpack, BookOpen, CalendarDays,
-  Check, CheckCircle2, ChevronDown, ChevronRight, ClipboardList, CloudSun,
+  Activity, ArrowLeft, ArrowRight, Backpack, BookOpen, CalendarDays,
+  Check, CheckCircle2, ChevronRight, CloudSun,
   Compass, Copy, Download, FileText, Flag, HardDrive, HeartPulse, Info, Layers3,
-  Map, MapPin, Menu, Mountain, Package, Pencil, Plus, Route as RouteIcon,
+  Map, MapPin, Menu, Mountain, Pencil, Plus, Route as RouteIcon,
   Search, Settings2, ShieldCheck, Sun, Trash2, TrainFront, Upload, Utensils,
   Wallet, X,
 } from 'lucide-react'
@@ -490,7 +490,7 @@ function SettingsPage({ notify }: { notify: Notify }) {
     catch(e) { notify(e instanceof Error ? e.message : 'Не удалось скачать копию', true) }
     finally { setBusy(false) }
   }
-  async function selectFile(e: React.ChangeEvent<HTMLInputElement>) {
+  async function selectFile(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     setPending(null)
     if (!file) return
