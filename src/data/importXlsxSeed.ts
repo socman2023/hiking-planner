@@ -21,7 +21,7 @@ function fingerprint(table: LibraryTableName, row: LibraryRow): string {
   switch (table) {
     case 'sources': return [normalize(row.provider), normalize(row.title), normalize(row.url)].join('|')
     case 'foods': return [normalize(row.name), normalize(row.brand)].join('|')
-    case 'gear': return [normalize(row.name), normalize(row.model)].join('|')
+    case 'gear': return [normalize(row.name), normalize(row.sourceDescription || row.model)].join('|')
     case 'medical': return [normalize(row.tradeName), normalize(row.kind)].join('|')
     case 'dishes': return normalize(row.title)
     case 'packages': {
@@ -65,6 +65,7 @@ export async function importXlsxCatalog(force = false, database: HikingDB = db):
         for (const incoming of payload[table]) {
           const mapped: LibraryRow = { ...incoming }
           if (typeof mapped.notes === 'string') mapped.notes = stripAutoNotes(mapped.notes)
+          if (table === 'ownedGear') mapped.ownershipStatus = 'confirmed'
           for (const name of Object.keys(foreignKeys[table] ?? {})) {
             const value = mapped[name]
             if (typeof value === 'string' && value) {
