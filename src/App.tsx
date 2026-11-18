@@ -62,7 +62,6 @@ function HikingPlanner() {
   const [notice, setNotice] = useState<Notice | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const location = useLocation()
-  const navigate = useNavigate()
   const notify: Notify = (text, error = false) => setNotice({ text, error })
   useEffect(() => {
     if (!notice) return
