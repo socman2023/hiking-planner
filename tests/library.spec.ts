@@ -11,7 +11,7 @@ test('создать продукт, фасовку и сохранить кар
   await page.getByRole('button', { name: /Сухари ржаные/ }).click()
   await page.getByRole('button', { name: 'Добавить', exact: true }).click()
   await page.getByLabel('Название фасовки').fill('Пакет 120 г')
-  await page.getByLabel('Масса продукта, г').fill('120')
+  await page.getByLabel('Масса фасовки или единицы, г').fill('120')
   await page.getByRole('dialog').getByRole('button', { name: 'Сохранить' }).click()
   await expect(page.getByText('Пакет 120 г')).toBeVisible()
   await page.reload()
