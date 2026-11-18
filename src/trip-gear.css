@@ -1,0 +1,17 @@
+.trip-gear-summary{display:flex;align-items:center;gap:12px;color:#8ad5c2;margin-bottom:18px;font-size:13px}
+.trip-gear-rows{display:grid;gap:10px}
+.trip-gear-row{display:flex;gap:14px;align-items:center;border:1px solid #315761;background:#102c37;border-radius:12px;padding:13px}
+.trip-gear-row>input[type=checkbox]{width:19px;height:19px;accent-color:#35d7b3;flex-shrink:0}
+.trip-gear-photo{width:58px;height:58px;background:#1b4549;display:flex;align-items:center;justify-content:center;border-radius:8px;color:#50bfac;flex-shrink:0;overflow:hidden}
+.trip-gear-photo img{height:100%;width:100%;object-fit:cover}
+.trip-gear-description{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0}
+.trip-gear-description strong{font-size:14px;color:#ebf6f3;overflow-wrap:anywhere}
+.trip-gear-description span{color:#a2bbc3;font-size:12px}
+.trip-gear-description small{color:#92c8bf;font-size:12px;overflow-wrap:anywhere}
+.trip-gear-actions{display:flex;gap:6px}
+.trip-gear-empty{display:flex;align-items:center;flex-direction:column;gap:12px;padding:45px;text-align:center}
+.trip-gear-empty p{max-width:450px}
+.trip-gear-form{display:grid;gap:14px}
+.trip-gear-checkbox{display:flex;align-items:center;gap:10px;color:#d8eae6;font-size:13px}
+.trip-gear-checkbox input{accent-color:#28b996}
+@media(max-width:580px){.trip-gear-row{gap:8px;padding:9px}.trip-gear-photo{width:44px;height:44px}.trip-gear-description span,.trip-gear-description small{font-size:11px}}

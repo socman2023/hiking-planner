@@ -25,6 +25,19 @@ export interface TripDay {
   notes: string
 }
 
+export type TripGearCarryMode = 'pack' | 'worn' | 'outside'
+export interface TripGearItem {
+  id: string
+  tripId: string
+  gearId: string
+  quantity: number
+  placement: string
+  carryMode: TripGearCarryMode
+  packed: boolean
+  notes: string
+  createdAt: string
+  updatedAt: string
+}
 export interface AppSetting {
   key: string
   value: string

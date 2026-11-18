@@ -21,6 +21,7 @@ import {
 } from './domain/trips'
 import './styles.css'
 import LibraryPage from './LibraryPage'
+import TripGearPage from './TripGearPage'
 
 type Notice = { text: string; error?: boolean }
 type Notify = (text: string, error?: boolean) => void
@@ -121,6 +122,7 @@ function HikingPlanner() {
           <Routes>
             <Route path="/" element={<TripsPage notify={notify}/>} />
             <Route path="/trips/:tripId" element={<TripDetails notify={notify}/>} />
+            <Route path="/trips/:tripId/gear" element={<TripGearPage/>} />
             <Route path="/library" element={<LibraryPage/>} />
             <Route path="/future/:kind" element={<FuturePage/>} />
             <Route path="/settings" element={<SettingsPage notify={notify}/>} />
@@ -360,6 +362,7 @@ function TripDetails({ notify }: { notify: Notify }) {
     <>
       <Link className="back-link" to="/"><ArrowLeft size={18}/> Все походы</Link>
       <PageHeading kicker="ПЛАН ПОХОДА" title={trip.title} description={trip.regionLabel || 'Регион пока не указан'}>
+        <Link className="button secondary" to={'/trips/'+tripId+'/gear'}><Backpack size={17}/> Снаряжение похода</Link>
         <button className="button secondary" onClick={() => void copyTrip()}><Copy size={17}/> Копировать</button>
         <button className="button primary" onClick={() => setFormOpen(true)}><Pencil size={17}/> Изменить</button>
       </PageHeading>
@@ -401,7 +404,7 @@ function TripDetails({ notify }: { notify: Notify }) {
           </section>
           <section className="panel next-step">
             <div className="panel-title"><h2>Дальше по плану</h2><Layers3 size={18}/></div>
-            <p>На следующих этапах к этому походу добавятся маршруты, меню, снаряжение, аптечка и погодные данные.</p>
+            <p>Список снаряжения и места размещения уже доступны для этого похода. Маршруты, меню, аптечка и погода появятся позже.</p>
             <Link to="/library" className="text-button">Посмотреть план библиотек <ArrowRight size={16}/></Link>
           </section>
           <section className="panel danger-panel"><div className="panel-title"><h2>Управление записью</h2></div><button className="button danger" onClick={() => void remove()}><Trash2 size={17}/> Удалить поход</button><p>Удаление необратимо. Резервную копию можно скачать в настройках.</p></section>

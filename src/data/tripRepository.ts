@@ -42,7 +42,7 @@ export async function updateTrip(
 }
 
 export async function duplicateTrip(tripId: string, database: HikingDB = db): Promise<Trip> {
-  return database.transaction('rw', database.trips, database.days, async () => {
+  return database.transaction('rw', database.trips, database.days, database.tripGear, async () => {
     const original = await database.trips.get(tripId)
     if (!original) throw new Error('Поход не найден')
     const days = await getTripDays(tripId, database)
@@ -54,6 +54,10 @@ export async function duplicateTrip(tripId: string, database: HikingDB = db): Pr
     const copiedDays = days.map((day) => ({ ...day, id: crypto.randomUUID(), tripId: copy.id }))
     await database.trips.add(copy)
     await database.days.bulkAdd(copiedDays)
+    const packed = await database.tripGear.where('tripId').equals(tripId).toArray()
+    if (packed.length) await database.tripGear.bulkAdd(packed.map(item => ({
+      ...item, id: crypto.randomUUID(), tripId: copy.id, createdAt: now, updatedAt: now,
+    })))
     return copy
   })
 }
@@ -68,7 +72,8 @@ export async function setTripStatus(
 }
 
 export async function deleteTrip(tripId: string, database: HikingDB = db): Promise<void> {
-  await database.transaction('rw', database.trips, database.days, async () => {
+  await database.transaction('rw', database.trips, database.days, database.tripGear, async () => {
+    await database.tripGear.where('tripId').equals(tripId).delete()
     await database.days.where('tripId').equals(tripId).delete()
     await database.trips.delete(tripId)
   })

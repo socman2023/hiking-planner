@@ -1,11 +1,12 @@
 import Dexie, { type Table } from 'dexie'
-import type { AppSetting, Trip, TripDay } from '../domain/trips'
+import type { AppSetting, Trip, TripDay, TripGearItem } from '../domain/trips'
 import type { LibraryRow } from '../domain/library'
 
 export class HikingDB extends Dexie {
   trips!: Table<Trip, string>
   days!: Table<TripDay, string>
   settings!: Table<AppSetting, string>
+  tripGear!: Table<TripGearItem, string>
   foods!: Table<LibraryRow, string>
   packages!: Table<LibraryRow, string>
   dishes!: Table<LibraryRow, string>
@@ -37,6 +38,10 @@ export class HikingDB extends Dexie {
       medical: 'id, tradeName, kind',
       medicalPacks: 'id, catalogItemId, expiryDate',
       sources: 'id, provider, title',
+    })
+    // Per-trip packing and placement must never be stored on library products.
+    this.version(3).stores({
+      tripGear: 'id, tripId, gearId, [tripId+gearId]',
     })
   }
 }
