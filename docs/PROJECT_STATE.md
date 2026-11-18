@@ -4,7 +4,7 @@
 **Репозиторий:** https://github.com/socman2023/hiking-planner  
 **Ветка:** main  
 **Веб-приложение:** https://socman2023.github.io/hiking-planner/  
-**Текущий этап:** 2 — постоянная библиотека и источники. Код опубликован; окончательная проверка E2E в GitHub Actions.
+**Статус:** этап 2 завершён, тесты и GitHub Pages прошли успешно. Этап 3 ещё не начат.
 
 ## Реализовано
 
@@ -42,6 +42,8 @@
 - Информация о лекарствах не заменяет официальные инструкции и назначения.
 
 ## Проверки
+
+**Подтверждённый запуск:** https://github.com/socman2023/hiking-planner/actions/runs/44301626255 — проверка TypeScript, 19 из 19 unit-тестов, production build, 8 из 8 E2E-тестов (desktop/mobile), без повторных попыток. Публикация GitHub Pages: https://github.com/socman2023/hiking-planner/actions/runs/44301626147 — success, коммит ad648b4018b3510f90a7b4938f26b424c3bdabfa.
 
 CI: https://github.com/socman2023/hiking-planner/actions
 
