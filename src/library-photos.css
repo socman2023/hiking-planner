@@ -5,7 +5,12 @@
 .library-upload-disabled{opacity:.5;cursor:not-allowed!important}
 .library-photos-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .library-photo-item{position:relative;margin:0;background:#112f38;border-radius:9px;overflow:hidden;border:1px solid #30535b}
-.library-photo-item img{display:block;aspect-ratio:4/3;object-fit:contain;background:#081e27;width:100%}
+.library-photos-grid.single{grid-template-columns:minmax(0,1fr)}
+.library-photo-zoom-open{display:grid;place-items:center;width:100%;min-height:160px;padding:8px;border:0;background:#081e27;cursor:zoom-in}
+.library-photo-item img{display:block;width:auto;height:auto;max-width:100%;max-height:460px;object-fit:contain;background:#081e27}
+.library-photo-lightbox{position:fixed;inset:0;background:rgba(1,10,15,.96);z-index:10050;display:flex;align-items:center;justify-content:center;padding:68px 22px 28px;cursor:zoom-out}
+.library-photo-lightbox img{width:auto;height:auto;max-width:95vw;max-height:85vh;object-fit:contain}
+.library-photo-lightbox-close{position:absolute;top:18px;right:18px;border:1px solid #5b7d80;border-radius:8px;background:#15313c;color:#f0fafa;padding:10px 16px;cursor:pointer}
 .library-photo-item figcaption{font-size:10px;color:#a6bec2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:7px 8px}
 .library-photo-remove{position:absolute;right:6px;top:6px;border-radius:6px;padding:7px;border:1px solid rgba(255,185,185,.35);background:#09222be8;color:#f5b5b2}
 .library-photo-empty{display:flex;align-items:center;justify-content:center;gap:11px;padding:27px 10px;color:#86a9ae;font-size:12px;border:1px dashed #34535a;border-radius:10px}

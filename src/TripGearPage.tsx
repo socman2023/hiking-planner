@@ -4,7 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { ArrowLeft, Backpack, Check, Pencil, Plus, Trash2, X } from 'lucide-react'
 import { db } from './data/db'
 import { getTripGear, saveTripGear, deleteTripGear, type TripGearInput } from './data/tripGearRepository'
-import { getLibraryPhotos, getSeedPhotoPath, type LibraryRow } from './domain/library'
+import { getLibraryPhotos, getSeedPhotoPath, getFullImgurImage, type LibraryRow } from './domain/library'
 import type { TripGearCarryMode, TripGearItem } from './domain/trips'
 import './trip-gear.css'
 
@@ -17,9 +17,7 @@ function photoFor(row?: LibraryRow): string | null {
   if (local) return local
   const path = getSeedPhotoPath(row)
   if (path) return import.meta.env.BASE_URL + path
-  const remote = row.photoUrl
-  return typeof remote === 'string' &&
-    /^https:\/\/i\.imgur\.com\/[A-Za-z0-9._-]+\.(?:jpg|jpeg|png|webp)$/i.test(remote) ? remote : null
+  return getFullImgurImage(row.photoUrl)
 }
 function empty(): TripGearInput {
   return { gearId:'', quantity:1, placement:'', carryMode:'pack', packed:false, notes:'' }

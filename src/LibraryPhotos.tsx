@@ -32,6 +32,7 @@ export function LibraryPhotos({ table, row, notify }: {
   table: LibraryTableName; row: LibraryRow; notify: (text: string, error?: boolean) => void
 }) {
   const [busy, setBusy] = useState(false)
+  const [enlarged, setEnlarged] = useState<LibraryPhoto | null>(null)
   const localPhotos = getLibraryPhotos(row)
   const publicPath = getSeedPhotoPath(row)
   const external = getFullImgurImage(row.photoUrl)
@@ -74,14 +75,15 @@ export function LibraryPhotos({ table, row, notify }: {
           onChange={event => void upload(event)}/>
       </label>
     </div>
-    {photos.length ? <div className="library-photos-grid">
+    {photos.length ? <div className={"library-photos-grid" + (photos.length === 1 ? " single" : "")}>
       {photos.map((p, i) => <figure key={i} className="library-photo-item">
-        <img loading="lazy" src={p.src} alt={'Фото: ' + p.name}/>
+        <button type="button" className="library-photo-zoom-open" onClick={() => setEnlarged(p)} aria-label={"Увеличить " + p.name}><img loading="lazy" src={p.src} alt={'Фото: ' + p.name}/></button>
         <figcaption title={p.name}>{p.name}</figcaption>
         {!showPublic && !showExternal && <button type="button" className="library-photo-remove" title="Удалить"
           aria-label={'Удалить фото ' + (i + 1)} disabled={busy} onClick={() => void remove(i)}><Trash2 size={15}/></button>}
       </figure>)}
     </div> : <div className="library-photo-empty"><Camera size={25}/><span>Фотографии пока не добавлены</span></div>}
+    {enlarged && <div className="library-photo-lightbox" role="dialog" aria-modal="true" aria-label="Просмотр фотографии" onClick={() => setEnlarged(null)}><button type="button" className="library-photo-lightbox-close" onClick={() => setEnlarged(null)}>Закрыть ×</button><img src={enlarged.src} alt={enlarged.name}/></div>}
     {showExternal && <p className="library-photo-caption">Фото из LighterPack. Для автономного просмотра загрузите свою копию снимка.</p>}
     {showPublic && <p className="library-photo-caption">{illustrative ? 'Типовое фото: точная модель по подписи файла не подтверждена.' : 'Фото из предоставленной папки Google Drive.'} Свой снимок можно добавить вместо него.</p>}
     <p className="library-photo-caption">JPG/PNG/WebP до 8 МБ. Пользовательские фото уменьшаются до 640 px и хранятся в браузере; JSON-бэкап включает их.</p>
