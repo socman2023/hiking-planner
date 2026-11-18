@@ -4,12 +4,22 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { ArrowLeft, Backpack, Check, Pencil, Plus, Trash2, X } from 'lucide-react'
 import { db } from './data/db'
 import { getTripGear, saveTripGear, deleteTripGear, type TripGearInput } from './data/tripGearRepository'
-import { getSeedPhotoPath } from './domain/library'
+import { getLibraryPhotos, getSeedPhotoPath, type LibraryRow } from './domain/library'
 import type { TripGearCarryMode, TripGearItem } from './domain/trips'
 import './trip-gear.css'
 
 const modeLabels: Record<TripGearCarryMode, string> = {
   pack: 'В рюкзаке', worn: 'На себе', outside: 'Снаружи рюкзака',
+}
+function photoFor(row?: LibraryRow): string | null {
+  if (!row) return null
+  const local = getLibraryPhotos(row)[0]?.src
+  if (local) return local
+  const path = getSeedPhotoPath(row)
+  if (path) return import.meta.env.BASE_URL + path
+  const remote = row.photoUrl
+  return typeof remote === 'string' &&
+    /^https:\/\/i\.imgur\.com\/[A-Za-z0-9._-]+\.(?:jpg|jpeg|png|webp)$/i.test(remote) ? remote : null
 }
 function empty(): TripGearInput {
   return { gearId:'', quantity:1, placement:'', carryMode:'pack', packed:false, notes:'' }
@@ -65,10 +75,10 @@ export default function TripGearPage() {
     {error && !adding && <p role="alert" className="library-error">{error}</p>}
     {list.length ? <div className="trip-gear-rows">
       {list.map(row=>{
-        const ref=lookup.get(row.gearId);const path=getSeedPhotoPath(ref)
+        const ref=lookup.get(row.gearId);const photo=photoFor(ref)
         return <div key={row.id} className="trip-gear-row">
           <input type="checkbox" aria-label={'Собрано: '+String(ref?.name??'предмет')} checked={row.packed} onChange={()=>void toggle(row)}/>
-          <div className="trip-gear-photo">{path?<img src={import.meta.env.BASE_URL+path} alt=""/>:<Backpack size={21}/>}</div>
+          <div className="trip-gear-photo">{photo?<img src={photo} alt=""/>:<Backpack size={21}/>}</div>
           <div className="trip-gear-description"><strong>{String(ref?.name??'Предмет удалён из библиотеки')}</strong>
             <span>{[ref?.model, 'Кол-во: '+row.quantity, modeLabels[row.carryMode]].filter(Boolean).join(' · ')}</span>
             <small><b>Место:</b> {row.placement||'Не назначено'}{row.notes ? ' · '+row.notes : ''}</small>
