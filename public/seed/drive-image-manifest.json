@@ -1,0 +1,236 @@
+{
+  "version": 1,
+  "origin": "Lighterpack folder on Google Drive",
+  "images": {
+    "a9cua5:282": {
+      "path": "seed/photos/gear-79.jpg",
+      "filename": "Forclaz Trek 900 UL 1.jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:488": {
+      "path": "seed/photos/gear-5.jpg",
+      "filename": "Therm-A-Rest NeoAir XLite.jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:764": {
+      "path": "seed/photos/gear-7.jpg",
+      "filename": "Sirex Allround.jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:1353": {
+      "path": "seed/photos/gear-81.jpg",
+      "filename": "Sivera Веньча.jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:744": {
+      "path": "seed/photos/gear-4.jpg",
+      "filename": "Sivera Вежа +3.jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:414": {
+      "path": "seed/photos/gear-80.jpg",
+      "filename": "Yeti Passion One.jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:403": {
+      "path": "seed/photos/gear-9.jpg",
+      "filename": "SeaToSummit Ultra-Sil Nano.jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:74": {
+      "path": "seed/photos/gear-3.jpg",
+      "filename": "Splav Cowl.jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:1578": {
+      "path": "seed/photos/gear-48.jpg",
+      "filename": "Ganzo Firebird F753M1-BK.jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:463": {
+      "path": "seed/photos/gear-49.jpg",
+      "filename": "Victorinox Classic.jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:1121": {
+      "path": "seed/photos/gear-49.jpg",
+      "filename": "Victorinox Classic.jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:402": {
+      "path": "seed/photos/gear-13.jpg",
+      "filename": "Camp Sky Carbon.jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:1065": {
+      "path": "seed/photos/gear-71.jpg",
+      "filename": "Adventure Medical Mountain Series Medical Kit (Day Tripper Lite).jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:806": {
+      "path": "seed/photos/gear-65.jpg",
+      "filename": "StS AirLite Towel L.jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:558": {
+      "path": "seed/photos/gear-67.jpg",
+      "filename": "Splav Mini.jpg",
+      "match": "exact-model"
+    },
+    "a9cua5:589": {
+      "path": "seed/photos/gear-108.jpg",
+      "filename": "Splav Readily 6l.jpg",
+      "match": "exact-model"
+    },
+    "4pg9c9:1358": {
+      "path": "seed/photos/gear-22.jpg",
+      "filename": "Sivera Лайда Про.jpg",
+      "match": "exact-model"
+    },
+    "4pg9c9:1214": {
+      "path": "seed/photos/gear-92.jpg",
+      "filename": "Olaian 500.jpg",
+      "match": "exact-model"
+    },
+    "4pg9c9:586": {
+      "path": "seed/photos/gear-21.jpg",
+      "filename": "Solognac SG900.jpg",
+      "match": "exact-model"
+    },
+    "4pg9c9:1127": {
+      "path": "seed/photos/gear-28.jpg",
+      "filename": "Silver Pinquin.jpg",
+      "match": "exact-model"
+    },
+    "4pg9c9:1396": {
+      "path": "seed/photos/gear-27.jpg",
+      "filename": "Splav Fresh.jpg",
+      "match": "exact-model"
+    },
+    "4pg9c9:1359": {
+      "path": "seed/photos/gear-20.jpg",
+      "filename": "Sivera Аер.jpg",
+      "match": "exact-model"
+    },
+    "4pg9c9:405": {
+      "path": "seed/photos/gear-91.jpg",
+      "filename": "Sivera Бехтерец Про.jpg",
+      "match": "exact-model"
+    },
+    "4pg9c9:406": {
+      "path": "seed/photos/gear-18.jpg",
+      "filename": "Sivera Берковец Quark.jpg",
+      "match": "exact-model"
+    },
+    "4pg9c9:408": {
+      "path": "seed/photos/gear-17.jpg",
+      "filename": "Sivera Ярец Про.jpg",
+      "match": "exact-model"
+    },
+    "4pg9c9:585": {
+      "path": "seed/photos/gear-93.jpg",
+      "filename": "Quechua Trek 100.jpg",
+      "match": "exact-model"
+    },
+    "4pg9c9:1522": {
+      "path": "seed/photos/gear-88.jpg",
+      "filename": "Buff Coolnet UV+ Zankor Blue.jpg",
+      "match": "exact-model"
+    },
+    "4pg9c9:1633": {
+      "path": "seed/photos/gear-15.jpg",
+      "filename": "Buff MW Merino Wool.jpg",
+      "match": "exact-model"
+    },
+    "4pg9c9:1357": {
+      "path": "seed/photos/gear-89.jpg",
+      "filename": "Sivera Хант.jpg",
+      "match": "exact-model"
+    },
+    "4pg9c9:1688": {
+      "path": "seed/photos/gear-30.jpg",
+      "filename": "Naturehike DuckDown Camp Boots.jpg",
+      "match": "exact-model"
+    },
+    "4pg9c9:170": {
+      "path": "seed/photos/gear-31.jpg",
+      "filename": "Splav Liner.jpg",
+      "match": "exact-model"
+    },
+    "4pg9c9:171": {
+      "path": "seed/photos/gear-32.jpg",
+      "filename": "Splav Comb Mid.jpg",
+      "match": "exact-model"
+    },
+    "4pg9c9:858": {
+      "path": "seed/photos/gear-97.jpg",
+      "filename": "Splav Tactical.jpg",
+      "match": "exact-model"
+    },
+    "4pg9c9:424": {
+      "path": "seed/photos/gear-34.jpg",
+      "filename": "Splav Hike.jpg",
+      "match": "exact-model"
+    },
+    "4pg9c9:169": {
+      "path": "seed/photos/gear-33.jpg",
+      "filename": "Splav Wade.jpg",
+      "match": "exact-model"
+    },
+    "4pg9c9:848": {
+      "path": "seed/photos/gear-26.jpg",
+      "filename": "Arcteryx Conveyor.jpg",
+      "match": "exact-model"
+    },
+    "4pg9c9:353": {
+      "path": "seed/photos/gear-96.jpg",
+      "filename": "Splav Support.jpg",
+      "match": "exact-model"
+    },
+    "gdl4a:283": {
+      "path": "seed/photos/gear-99.jpg",
+      "filename": "JetBoil MicroMo.jpg",
+      "match": "exact-model"
+    },
+    "gdl4a:237": {
+      "path": "seed/photos/gear-35.jpg",
+      "filename": "Splav Tasty.jpg",
+      "match": "exact-model"
+    },
+    "gdl4a:299": {
+      "path": "seed/photos/gear-98.jpg",
+      "filename": "NZ Ti Folding Spoon.jpg",
+      "match": "exact-model"
+    },
+    "gdl4a:850": {
+      "path": "seed/photos/gear-102.jpg",
+      "filename": "Zojirushi Stainless Mug 600.jpg",
+      "match": "exact-model"
+    },
+    "gdl4a:1380": {
+      "path": "seed/photos/gear-40.jpg",
+      "filename": "Platypus Dirty 1L.jpg",
+      "match": "exact-model"
+    },
+    "0lr1s5:1169": {
+      "path": "seed/photos/gear-56.jpg",
+      "filename": "Nitecore NPB1.jpg",
+      "match": "exact-model"
+    },
+    "0lr1s5:1617": {
+      "path": "seed/photos/gear-47.jpg",
+      "filename": "Nitecore-NU25.jpg",
+      "match": "exact-model"
+    },
+    "0lr1s5:1123": {
+      "path": "seed/photos/gear-106.jpg",
+      "filename": "Sony WI-XB400.jpg",
+      "match": "exact-model"
+    },
+    "0lr1s5:730": {
+      "path": "seed/photos/gear-61.jpg",
+      "filename": "AKG.jpg",
+      "match": "exact-model"
+    }
+  }
+}
