@@ -87,7 +87,9 @@ export const definitions: Record<LibraryTableName, LibraryDefinition> = {
     label: 'Источники', singular: 'источник', title: 'title',
     fields: [field('title', 'Название источника', 'text', true), field('provider', 'Поставщик / организация', 'text', true),
       field('url', 'Ссылка', 'url'), field('licence', 'Лицензия / условия использования'),
-      field('retrievedAt', 'Дата получения', 'date'), field('reviewedAt', 'Дата проверки', 'date'),
+      field('retrievedAt', 'Дата получения', 'date'),
+      { ...field('reliability', 'Статус проверки', 'select'), options: ['unreviewed', 'source_recorded', 'user_verified'] },
+      field('reviewedAt', 'Дата проверки', 'date'),
       notes],
   },
 }

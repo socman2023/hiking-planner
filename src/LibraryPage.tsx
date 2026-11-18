@@ -26,6 +26,7 @@ const tabInfo: Record<RootTab, string> = {
 const enumLabels: Record<string, string> = {
   unknown: 'Неизвестно', dry: 'Сухой продукт', ready: 'Готовый продукт',
   as_packaged: 'Как в упаковке', medicine: 'Лекарство', device: 'Медицинское изделие',
+  unreviewed: 'Не проверено', source_recorded: 'Источник указан', user_verified: 'Проверено вручную',
 }
 
 function titleOf(table: LibraryTableName, item: LibraryRow): string {
@@ -55,12 +56,12 @@ function FieldEditor({ spec, value, onChange, rows, fixed }: {
     <label className="library-field" htmlFor={inputId}>
       <span>{spec.label}{spec.required && <b> *</b>}</span>
       {fixed ? (
-        <input id={inputId} disabled value={linked ? (rows[linked].find(r => r.id === value) ?
+        <input id={inputId} aria-label={spec.label} disabled value={linked ? (rows[linked].find(r => r.id === value) ?
           titleOf(linked, rows[linked].find(r => r.id === value)!) : value) : value} />
       ) : spec.type === 'textarea' ? (
-        <textarea id={inputId} rows={3} maxLength={5000} value={value} onChange={event => onChange(event.target.value)} />
+        <textarea id={inputId} aria-label={spec.label} rows={3} maxLength={5000} value={value} onChange={event => onChange(event.target.value)} />
       ) : spec.type === 'select' ? (
-        <select id={inputId} value={value} required={spec.required} onChange={event => onChange(event.target.value)}>
+        <select id={inputId} aria-label={spec.label} value={value} required={spec.required} onChange={event => onChange(event.target.value)}>
           <option value="" disabled={Boolean(spec.required)}>{spec.required ? 'Выберите…' : 'Не указано'}</option>
           {spec.options ? spec.options.map(option =>
             <option key={option} value={option}>{enumLabels[option] ?? option}</option>) :
@@ -68,7 +69,7 @@ function FieldEditor({ spec, value, onChange, rows, fixed }: {
               <option key={entry.id} value={entry.id}>{titleOf(linked, entry)}</option>)}
         </select>
       ) : (
-        <input id={inputId} type={spec.type === 'number' ? 'number' :
+        <input id={inputId} aria-label={spec.label} type={spec.type === 'number' ? 'number' :
           spec.type === 'date' ? 'date' : spec.type === 'url' ? 'url' : 'text'}
           min={spec.type === 'number' ? '0' : undefined}
           step={spec.type === 'number' ? 'any' : undefined}
