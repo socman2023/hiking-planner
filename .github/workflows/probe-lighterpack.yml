@@ -1,0 +1,23 @@
+name: Diagnose public LighterPack pages
+
+on:
+  push:
+    paths:
+      - 'scripts/probe-lighterpack.mjs'
+      - '.github/workflows/probe-lighterpack.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Read public lists
+        run: node scripts/probe-lighterpack.mjs
