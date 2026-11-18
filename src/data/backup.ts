@@ -48,8 +48,8 @@ function validTrip(value: unknown): value is Trip {
     string(value.activityType) && value.activityType in activityLabels &&
     string(value.status) && value.status in statusLabels &&
     string(value.startDate) && validISODate(value.startDate) &&
-    Number.isInteger(value.dayCount) && (value.dayCount as number) >= 1 &&
-    (value.dayCount as number) <= 365 &&
+    typeof value.dayCount === 'number' && Number.isInteger(value.dayCount) && value.dayCount >= 1 &&
+    value.dayCount <= 365 &&
     dateTime(value.createdAt) && dateTime(value.updatedAt)
 }
 function validDay(value: unknown): value is TripDay {
