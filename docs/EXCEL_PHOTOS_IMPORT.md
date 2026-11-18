@@ -1,35 +1,44 @@
-# Excel import and photo support — verification notes
+# Hiking Planner — импорт Excel и фотографий
 
-## Source of data
+**Состояние на 18.11.2026:** завершено; данные и реальные фотографии доступны в публичном приложении. Рабочая версия: https://socman2023.github.io/hiking-planner/library
+
+## Источники
+
 - «Крым_4_дня_оптимизирован_все_листы.xlsx»
 - «Архыз_4 дня.xlsx»
+- Фото: Google Drive, исправленная папка https://drive.google.com/drive/folders/1URbLYmZbaCL-sdozFKcrglbbmGOvBQ_3
+- Дополнительные внешние страницы LighterPack a9cua5, 4pg9c9, gdl4a, 0lr1s5 сохранены в списке источников, но из них не заявляется импорт проверенных спецификаций: прямое получение страниц не было доступно.
 
-Only gear, food and first-aid lists were extracted; personal contacts, transport reservations and private routes were excluded.
-The catalogue imports into a local browser database. Source-file data is stored in the public repository as a static compressed seed and should not be interpreted as a currently accurate personal inventory.
+Из Excel исключены контактные сведения участников, транспортные билеты и частные маршруты: в публичный статический каталог помещены только справочные позиции снаряжения, продуктов и аптечки.
 
-## Data counts
-- Foods: 43
-- Package variants: 43
-- Gear: 113 input rows / 111 unique gear records after matching
-- Medical names: 27
-- Historical medical pack records: 54
-- Source references: 9
-- External photographs fetched: **0** (unavailable Google Drive folder / LighterPack URLs)
+## Импортировано из Excel
 
-## Photos
-- File upload uses the browser only; accepted MIME types: JPEG, PNG and WebP.
-- Images are resized to no more than 640px on the longest side with a four-per-record limit.
-- PhotoData is validated and saved on the same IndexedDB library record; no network upload.
-- Edits preserve photoData. Library JSON and full backup v2 include photoData.
-- CSV does not carry image bytes.
-- Keep regular offline backup copies: browser cache eviction removes local photos too.
+- 43 продукта
+- 43 фасовки продуктов
+- 113 исходных строк снаряжения / 111 уникальных моделей после сопоставления
+- 27 справочных позиций лекарств и медизделий
+- 54 исторические записи аптечных упаковок
+- 9 ссылок/описаний происхождения данных
 
-## External blockers
-- Google Drive folder 1bsheOi134N0or6DekxmtK-eaIFlxyPf3 returned 404 for both connected Google accounts.
-- LighterPack a9cua5, 4pg9c9, gdl4a, 0lr1s5 could not be fetched; no product photographs or specifications from those pages were asserted.
-- If access is later restored, match product-specific photos to exact models and record image rights/license before importing.
+Исторические списки не являются подтверждением текущего владения предметами или актуальной годности аптечки. Неизвестный вес не должен считаться нулевым.
 
-## QA
-- Tests: tests/seed-photos.spec.ts for one-time seed, repeat merge and photo persistence.
-- Tests: existing project TypeScript, unit and browser E2E suites.
-- Final Actions run IDs to be attached after CI completion.
+## Фото
+
+- В исправленной папке Google Drive обнаружены подходящие изображения; **50 фото конкретных позиций снаряжения** скачаны, проверены по названиям моделей и добавлены как статические файлы в public/seed/photos/gear-*.jpg.
+- Реестр соответствий имени файла и исходной фотографии: docs/GEAR_PHOTO_SOURCES.json.
+- Автоматическое однократное связывание выполняет src/data/gearPhotoSeed.ts.
+- Карточки поддерживают пользовательские JPG/PNG/WebP до 8 МБ за файл, до четырёх фото. Изображения уменьшаются в браузере до 640 px по длинной стороне и сохраняются в IndexedDB без загрузки на сервер.
+- Локально загруженные пользователем изображения сохраняются в JSON библиотеки и полном бэкапе, а CSV фотографии не содержит.
+- Там, где соответствие фотографии конкретной модели не подтверждено, изображение **не назначалось**.
+
+В публичном GitHub и GitHub Pages размещаются только включённые в проект исходные изображения, относящиеся к каталогу. Правовой статус изображений следует проверить перед коммерческим распространением.
+
+## Автоматическое первичное заполнение
+
+На странице «Библиотека» приложение загружает сжатый статический каталог public/seed/catalog.bin через src/data/importXlsxSeed.ts; данные сохраняются **в IndexedDB данного браузерного профиля**. На повторных посещениях импорт не дублируется. Кнопка «Сверить и добавить недостающее» позволяет добавить отсутствующие записи, не заменяя пользовательские данные. Это не общая облачная база: у каждого браузера своя локальная копия.
+
+## Проверки
+
+- Код: 6e06d0fa02a9b94b3df6d31f11286aa9f730f2cf
+- CI: https://github.com/socman2023/hiking-planner/actions/runs/44311447798 — TypeScript, сборка, 19/19 unit и 14/14 browser E2E.
+- GitHub Pages: https://github.com/socman2023/hiking-planner/actions/runs/44311447831 — success.
