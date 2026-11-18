@@ -1,5 +1,5 @@
 import 'fake-indexeddb/auto'
-import { describe, expect, it } from 'vitest'
+import { expect, it } from 'vitest'
 import { HikingDB } from './db'
 import { saveLibraryRow } from './libraryRepository'
 import { correctImportedFoodUnits } from './catalogCorrections'
