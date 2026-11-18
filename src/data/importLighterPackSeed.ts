@@ -1,7 +1,7 @@
 import { db, type HikingDB } from './db'
 import type { LibraryRow } from '../domain/library'
 
-const VERSION = 'lighterpack-2026-11-18-v2-model-matching'
+const VERSION = 'lighterpack-2026-11-18-v3-links'
 const SETTING = 'lighterpackSeedVersion'
 interface LPItem {
   itemId: string
@@ -21,6 +21,9 @@ function norm(value: unknown): string {
 }
 function key(name: unknown, model: unknown): string {
   return norm(name) + '|' + norm(model)
+}
+function validProductLink(value: string): boolean {
+  try { return ['http:','https:'].includes(new URL(value).protocol) } catch { return false }
 }
 function validPhoto(value: string): boolean {
   return /^https:\/\/i\.imgur\.com\/[A-Za-z0-9._-]+\.(?:jpg|jpeg|png|webp)$/i.test(value)
@@ -75,6 +78,7 @@ export async function importLighterPackCatalog(force = false, database: HikingDB
         const description=item.description.trim()
         const ref=key(title,description)
         const photo=validPhoto(item.photoUrl || '') ? item.photoUrl : ''
+        const productUrl=validProductLink(item.productUrl || '') ? item.productUrl : ''
         const candidates = byModel.get(norm(description)) ?? []
         // Only merge a differently named source item when its detailed model matches uniquely.
         const current=byKey.get(ref) ?? (description.length >= 14 && candidates.length === 1 ? candidates[0] : undefined)
@@ -82,6 +86,7 @@ export async function importLighterPackCatalog(force = false, database: HikingDB
           existing++
           const changes: Record<string,string|number>={}
           if (photo && !current.photoUrl) { changes.photoUrl=photo; images++ }
+          if (productUrl && !current.productUrl) changes.productUrl=productUrl
           if (typeof item.weightG==='number' && current.listedWeightG == null) {
             changes.listedWeightG=item.weightG
           }
@@ -97,7 +102,7 @@ export async function importLighterPackCatalog(force = false, database: HikingDB
           id:crypto.randomUUID(),createdAt:now,updatedAt:now,
           name:title,brand:'',model:description,category:item.category.trim().slice(0,500),
           manufacturerWeightG:null,listedWeightG:item.weightG,
-          photoUrl:photo,sourceRef:sourceIds.get(list.code)||'',notes:''
+          photoUrl:photo,productUrl,sourceRef:sourceIds.get(list.code)||'',notes:''
         }
         await database.gear.add(row)
         byKey.set(ref,row)

@@ -60,7 +60,7 @@ export const definitions: Record<LibraryTableName, LibraryDefinition> = {
     label: 'Снаряжение', singular: 'позицию', title: 'name',
     fields: [field('name', 'Название', 'text', true), field('brand', 'Бренд'), field('model', 'Модель'),
       category, grams('manufacturerWeightG', 'Масса производителя, г'),
-      grams('listedWeightG', 'Вес из походного списка, г'), field('photoUrl', 'URL фотографии', 'url'), sourceRef, notes],
+      grams('listedWeightG', 'Вес из походного списка, г'), field('photoUrl', 'URL фотографии', 'url'), field('productUrl', 'Страница товара', 'url'), sourceRef, notes],
   },
   ownedGear: {
     label: 'Свои вещи', singular: 'экземпляр', title: 'nickname',
