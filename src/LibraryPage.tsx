@@ -17,7 +17,7 @@ import { LibraryPhotos } from './LibraryPhotos'
 import { importXlsxCatalog } from './data/importXlsxSeed'
 import { cleanImportedLibraryNotes } from './data/cleanLibraryNotes'
 import { correctImportedFoodUnits } from './data/catalogCorrections'
-import { correctImportedGearFields } from './data/gearCorrections'
+import { correctImportedGearFields, correctJetboilBrand } from './data/gearCorrections'
 import { attachVerifiedGearPhotos } from './data/gearPhotoSeed'
 import { importLighterPackCatalog } from './data/importLighterPackSeed'
 
@@ -176,6 +176,7 @@ export default function LibraryPage() {
     void cleanImportedLibraryNotes().then(() => importXlsxCatalog()).then(async result => {
       await correctImportedFoodUnits()
       await correctImportedGearFields()
+      await correctJetboilBrand()
       const pictures = await attachVerifiedGearPhotos()
       const lighter = await importLighterPackCatalog()
       if (!mounted) return

@@ -29,3 +29,20 @@ export async function correctImportedGearFields(database: HikingDB = db): Promis
     return count
   })
 }
+
+/** Repair clearly identifiable Jetboil brand names in previously imported entries.
+ * A verified manufacturer name is distinct from verifying the item's exact SKU or weight. */
+export async function correctJetboilBrand(database: HikingDB = db): Promise<number> {
+  return database.transaction('rw', database.gear, async () => {
+    let changed = 0
+    for (const row of await database.gear.toArray()) {
+      if (String(row.brand ?? '').trim()) continue
+      const name = String(row.name ?? '')
+      const model = String(row.model ?? '')
+      if (!/(^|[\\s,(])jetboil\\b/i.test(model) && !/^jetboil\\b/i.test(name)) continue
+      await database.gear.update(row.id, {brand:'Jetboil',updatedAt:new Date().toISOString()})
+      changed++
+    }
+    return changed
+  })
+}
