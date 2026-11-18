@@ -34,7 +34,8 @@ export default function TripGearPage() {
   const [error,setError] = useState('')
   const [saving,setSaving] = useState(false)
   const list = useMemo(()=>[...(entries ?? [])].sort((a,b) => a.placement.localeCompare(b.placement,'ru') || a.createdAt.localeCompare(b.createdAt)),[entries])
-  const choices = useMemo(() => [...(gear ?? [])].filter(row => [row.name,row.brand,row.model]
+  const choices = useMemo(() => [...(gear ?? [])].filter(row => [row.name,row.brand,row.model,
+    [row.brand,row.model].filter(Boolean).join(' '),[row.name,row.brand,row.model].filter(Boolean).join(' ')]
     .some(v => String(v??'').toLocaleLowerCase('ru').includes(filter.toLocaleLowerCase('ru'))))
     .sort((a,b)=>String(a.name).localeCompare(String(b.name),'ru')).slice(0,80),[gear,filter])
   const lookup = new Map((gear ?? []).map(row => [row.id,row]))
