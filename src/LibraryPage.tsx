@@ -5,7 +5,7 @@ import {
   ShieldCheck, Trash2, X,
 } from 'lucide-react'
 import {
-  childByRoot, definitions, foreignKeys, parentKey, rootTabs,
+  childByRoot, definitions, parentKey, rootTabs,
   type FieldSpec, type LibraryRow, type LibraryTableName, type RootTab,
 } from './domain/library'
 import {
