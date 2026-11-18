@@ -20,13 +20,14 @@ import {
   type ActivityType, type DayKind, type Trip, type TripDay, type TripInput, type TripStatus,
 } from './domain/trips'
 import './styles.css'
+import LibraryPage from './LibraryPage'
 
 type Notice = { text: string; error?: boolean }
 type Notify = (text: string, error?: boolean) => void
 
 const navItems = [
   { label: 'Мои походы', icon: Compass, href: '/', stage: 1 },
-  { label: 'Библиотека', icon: BookOpen, href: '/library', stage: 2 },
+  { label: 'Библиотека', icon: BookOpen, href: '/library', stage: 1 },
   { label: 'Маршрут и карта', icon: Map, href: '/future/route', stage: 5 },
   { label: 'Меню и раскладка', icon: Utensils, href: '/future/food', stage: 3 },
   { label: 'Снаряжение', icon: Backpack, href: '/future/gear', stage: 4 },
@@ -120,7 +121,7 @@ function HikingPlanner() {
           <Routes>
             <Route path="/" element={<TripsPage notify={notify}/>} />
             <Route path="/trips/:tripId" element={<TripDetails notify={notify}/>} />
-            <Route path="/library" element={<FuturePage kind="library"/>} />
+            <Route path="/library" element={<LibraryPage/>} />
             <Route path="/future/:kind" element={<FuturePage/>} />
             <Route path="/settings" element={<SettingsPage notify={notify}/>} />
             <Route path="*" element={<NotFound/>} />
