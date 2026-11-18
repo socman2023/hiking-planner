@@ -79,7 +79,7 @@ export async function replaceLibrary(archive: LibraryArchive, database: HikingDB
 }
 export async function saveLibraryRow(table: LibraryTableName, values: Record<string, unknown>,
   id?: string, database: HikingDB = db): Promise<LibraryRow> {
-  return database.transaction('rw', ...libraryTables.map(name => database[name]), async () => {
+  return database.transaction('rw', libraryTables.map(name => database[name]), async () => {
     const current = id ? await database[table].get(id) : undefined
     if (id && !current) throw new Error('Запись не найдена')
     const item = normalizeRow(table, values, current)
@@ -94,7 +94,7 @@ export async function saveLibraryRow(table: LibraryTableName, values: Record<str
   })
 }
 export async function deleteLibraryRow(table: LibraryTableName, id: string, database: HikingDB = db): Promise<void> {
-  await database.transaction('rw', ...libraryTables.map(name => database[name]), async () => {
+  await database.transaction('rw', libraryTables.map(name => database[name]), async () => {
     if (!(await database[table].get(id))) throw new Error('Запись не найдена')
     for (const other of libraryTables) {
       const references = foreignKeys[other] ?? {}

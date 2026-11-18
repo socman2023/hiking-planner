@@ -116,8 +116,8 @@ export function parseBackup(text: string): AnyBackup {
 
 export async function restoreBackup(backup: AnyBackup, database: HikingDB = db): Promise<void> {
   const checked = parseBackup(JSON.stringify(backup))
-  await database.transaction('rw', database.trips, database.days, database.settings,
-    ...libraryTables.map(table => database[table]), async () => {
+  await database.transaction('rw', [database.trips, database.days, database.settings,
+    ...libraryTables.map(table => database[table])], async () => {
     await Promise.all([database.trips.clear(), database.days.clear(), database.settings.clear()])
     if (checked.schemaVersion === 2) {
       for (const table of libraryTables) await database[table].clear()
