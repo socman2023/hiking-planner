@@ -1,5 +1,4 @@
 import { db, type HikingDB } from './db'
-import { detectGearBrand } from '../domain/gearBrand'
 import { parseGearDescription } from '../domain/gearDescription'
 
 /** Moves historical Excel weights out of the manufacturer's field.

@@ -3,7 +3,7 @@ import type { LibraryRow } from '../domain/library'
 import { parseGearDescription } from '../domain/gearDescription'
 
 const SETTING = 'lighterpackSeedVersion'
-const VERSION = 'lighterpack-v6-normalized-models-owned-v1'
+const VERSION = 'lighterpack-v7-all-rows-owned-v1'
 interface LPItem {
   itemId: string; name: string; description: string; category: string
   weightG: number | null; quantity?: number; photoUrl: string; productUrl: string
@@ -44,11 +44,14 @@ export async function importLighterPackCatalog(force = false, database: HikingDB
       return {added:0,existing:0,images:0}
     const gear = await database.gear.toArray()
     const bySource = new Map<string, LibraryRow>()
+    const byUndescribed = new Map<string, LibraryRow>()
+    const plainKey=(name:unknown,weight:unknown,photo:unknown)=>key(name,weight)+'|'+norm(photo)
     const byRaw = new Map<string, LibraryRow>()
     const byModel = new Map<string, LibraryRow[]>()
     for (const row of gear) {
       for (const sourceKey of keysFor(row)) bySource.set(sourceKey,row)
       byRaw.set(key(row.name,row.sourceDescription || row.model), row)
+      if (!row.model && !row.sourceDescription) byUndescribed.set(plainKey(row.name,row.listedWeightG,row.photoUrl),row)
       const model = norm(row.model)
       if (model.length < 4) continue
       byModel.set(key(row.name,model),[...(byModel.get(key(row.name,model)) ?? []),row])
@@ -73,15 +76,17 @@ export async function importLighterPackCatalog(force = false, database: HikingDB
     }
     let added = 0, existing = 0, images = 0
     for (const list of data.lists) for (const item of list.items) {
-      if (!item.name || !item.description || item.name.length > 500 || item.description.length > 500 ||
+      if (!item.name || item.name.length > 500 || String(item.description ?? '').length > 500 ||
           (item.weightG !== null && (!Number.isFinite(item.weightG) || item.weightG < 0))) continue
-      const parsed = parseGearDescription(item.description,item.name)
+      const description=String(item.description ?? '')
+      const parsed = parseGearDescription(description,item.name)
       const identifier = idFor(list.code,item.itemId)
-      const rawKey = key(item.name,item.description)
+      const rawKey = key(item.name,description)
       const normalizedKey = key(item.name,parsed.model)
       const candidates = byModel.get(normalizedKey) ?? []
-      const current = bySource.get(identifier) || byRaw.get(rawKey) ||
-        (candidates.length === 1 && norm(candidates[0].sourceDescription || candidates[0].model) === norm(item.description)
+      const current = bySource.get(identifier) ||
+        (description ? byRaw.get(rawKey) : byUndescribed.get(plainKey(item.name,item.weightG,item.photoUrl))) ||
+        (description && candidates.length === 1 && norm(candidates[0].sourceDescription || candidates[0].model) === norm(description)
           ? candidates[0] : undefined)
       const photo=validPhoto(item.photoUrl || '') ? item.photoUrl : ''
       const productUrl=validProductUrl(item.productUrl || '') ? item.productUrl : ''
@@ -93,8 +98,8 @@ export async function importLighterPackCatalog(force = false, database: HikingDB
         linked=current;existing++
         const changes: Record<string,string|number|null>={}
         if (!current.brand && parsed.brand) changes.brand=parsed.brand
-        if (norm(current.model) === norm(item.description) && parsed.model) changes.model=parsed.model
-        if (!current.sourceDescription) changes.sourceDescription=item.description
+        if (norm(current.model) === norm(description) && parsed.model) changes.model=parsed.model
+        if (!current.sourceDescription && description) changes.sourceDescription=description
         for (const field of ['lengthCm','widthCm','thicknessCm','rValue'] as const)
           if (current[field] == null && parsed[field] !== null) changes[field]=parsed[field]
         if (!current.temperatureHint && parsed.temperatureHint) changes.temperatureHint=parsed.temperatureHint
@@ -116,14 +121,15 @@ export async function importLighterPackCatalog(force = false, database: HikingDB
           name:item.name.trim(),brand:parsed.brand,model:parsed.model,category:item.category.slice(0,500),
           lengthCm:parsed.lengthCm,widthCm:parsed.widthCm,thicknessCm:parsed.thicknessCm,
           rValue:parsed.rValue,temperatureHint:parsed.temperatureHint,specifications:parsed.specifications,
-          sourceDescription:item.description,sourceEntryKeys:identifier,
+          sourceDescription:description,sourceEntryKeys:identifier,
           manufacturerWeightG:null,listedWeightG:item.weightG,
           photoUrl:photo,productUrl,photoPath:drivePath,photoMatch:drivePath?'exact':null,
           sourceRef:sourceIds.get(list.code)||'',notes:''}
         await database.gear.add(linked)
         added++
         if(photo)images++
-        byRaw.set(rawKey,linked)
+        if(description) byRaw.set(rawKey,linked)
+        else byUndescribed.set(plainKey(item.name,item.weightG,item.photoUrl),linked)
         byModel.set(normalizedKey,[...(byModel.get(normalizedKey) ?? []),linked])
       }
       bySource.set(identifier,linked)
