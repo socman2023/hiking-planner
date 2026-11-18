@@ -21,7 +21,7 @@ test('создать медицинское изделие и конкретну
   await page.goto('/library')
   await page.getByRole('tab', { name: /Аптечный каталог/ }).click()
   await page.getByRole('button', { name: 'Добавить позицию' }).click()
-  await page.getByLabel('Тип').selectOption('device')
+  await page.getByLabel('Тип', { exact: true }).selectOption('device')
   await page.getByLabel('Название', { exact: true }).fill('Стерильный бинт')
   await page.getByRole('dialog').getByRole('button', { name: 'Сохранить' }).click()
   await page.getByRole('button', { name: /Стерильный бинт/ }).click()
