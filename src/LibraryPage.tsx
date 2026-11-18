@@ -15,6 +15,7 @@ import {
 import './library.css'
 import { LibraryPhotos } from './LibraryPhotos'
 import { importXlsxCatalog } from './data/importXlsxSeed'
+import { cleanImportedLibraryNotes } from './data/cleanLibraryNotes'
 import { attachVerifiedGearPhotos } from './data/gearPhotoSeed'
 
 type Editor = { table: LibraryTableName; row?: LibraryRow; preset?: Record<string, string> }
@@ -167,7 +168,7 @@ export default function LibraryPage() {
   useEffect(() => {
     let mounted = true
     setSeedBusy(true)
-    void importXlsxCatalog().then(async result => {
+    void cleanImportedLibraryNotes().then(() => importXlsxCatalog()).then(async result => {
       const pictures = await attachVerifiedGearPhotos()
       if (!mounted) return
       setSeedStatus(result.alreadyImported ?

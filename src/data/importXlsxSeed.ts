@@ -12,6 +12,8 @@ const order: LibraryTableName[] = [
   'sources', 'foods', 'gear', 'medical', 'dishes', 'packages',
   'ingredients', 'ownedGear', 'medicalPacks',
 ]
+import { stripAutoNotes } from './cleanLibraryNotes'
+
 function normalize(value: unknown): string {
   return String(value ?? '').trim().toLocaleLowerCase('ru')
 }
@@ -57,6 +59,7 @@ export async function importXlsxCatalog(force = false, database: HikingDB = db):
         const index = new Map(present.map(row => [fingerprint(table, row), row]))
         for (const incoming of payload[table]) {
           const mapped: LibraryRow = { ...incoming }
+          if (typeof mapped.notes === 'string') mapped.notes = stripAutoNotes(mapped.notes)
           for (const name of Object.keys(foreignKeys[table] ?? {})) {
             const value = mapped[name]
             if (typeof value === 'string' && value) {
